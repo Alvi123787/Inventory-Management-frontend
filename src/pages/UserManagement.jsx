@@ -219,7 +219,8 @@ const UserManagement = () => {
 
     try {
       const token = localStorage.getItem("token");
-      await axios.delete(`${API_URL}/users/${userId}`, {
+      const url = role === 'sub_admin' ? `${API_URL}/account/users/${userId}` : `${API_URL}/users/${userId}`;
+      await axios.delete(url, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setMessage("User deleted successfully");
@@ -320,6 +321,13 @@ const UserManagement = () => {
 
   const currentUserId = getCurrentUserId();
 
+  const canDeleteRow = (u) => {
+    const rowRole = String(u?.role || '').trim().toLowerCase();
+    if (role === 'admin') return u?.id !== currentUserId;
+    if (role === 'sub_admin') return rowRole === 'user';
+    return false;
+  };
+
   const displayAccess = (u) => {
     const fr = u?.feature_roles;
     if (!fr) return '—';
@@ -375,7 +383,7 @@ const UserManagement = () => {
             </div>
             <div style={{ padding: '1.25rem' }}>
               <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-                {['products','orders','reports','dashboard'].map((fr) => (
+                {['products','orders','reports','dashboard','expenses','settings'].map((fr) => (
                   <label key={fr} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.25rem 0.5rem', border: '1px solid #e0e0e0', borderRadius: '6px' }}>
                     <input type="checkbox" checked={tempFeatureRoles.includes(fr)} onChange={() => toggleTempRole(fr)} />
                     {fr}
@@ -488,6 +496,9 @@ const UserManagement = () => {
                     <th style={userManagementStyles.tableCell}>Owner</th>
                     <th style={userManagementStyles.tableCell}>Access</th>
                     <th style={userManagementStyles.tableCell}>Created</th>
+                    {(role === 'admin' || role === 'sub_admin') && (
+                      <th style={userManagementStyles.tableCell}>Actions</th>
+                    )}
                   </tr>
                 </thead>
                 <tbody>
@@ -510,7 +521,24 @@ const UserManagement = () => {
                           : (user.role === 'sub_admin' ? 'Admin' : '—')}
                       </td>
                       <td style={userManagementStyles.tableCell}>{displayAccess(user)}</td>
-                      <td style={userManagementStyles.tableCell}>{new Date(user.created_at).toLocaleDateString()}</td>
+                      <td style={userManagementStyles.tableCell}>{user.created_at ? new Date(user.created_at).toLocaleDateString() : '—'}</td>
+                      {(role === 'admin' || role === 'sub_admin') && (
+                        <td style={{...userManagementStyles.tableCell, textAlign: 'right'}}>
+                          <button
+                            type="button"
+                            style={{
+                              ...userManagementStyles.button,
+                              ...userManagementStyles.buttonDanger,
+                              ...userManagementStyles.buttonSmall,
+                              ...(canDeleteRow(user) ? {} : userManagementStyles.buttonDisabled)
+                            }}
+                            disabled={!canDeleteRow(user)}
+                            onClick={() => deleteUser(user.id, user.name)}
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>

@@ -223,14 +223,14 @@ function Navbar() {
                 </NavLink>
               </li>
             )}
-            {(userRole === "admin" || userRole === "sub_admin") && (
+            {can("expenses") && (
               <li className="dnb-nav-item nav-item">
                 <NavLink className="dnb-nav-link nav-link" to="/expenses">
                   Expenses
                 </NavLink>
               </li>
             )}
-            {(userRole === "admin" || userRole === "sub_admin") && (
+            {can("settings") && (
               <li className="dnb-nav-item nav-item">
                 <NavLink className="dnb-nav-link nav-link" to="/settings">
                   Settings

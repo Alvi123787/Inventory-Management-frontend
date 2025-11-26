@@ -103,7 +103,7 @@ function AppContent() {
           <Route
             path="/settings"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute featureRequired="settings">
                 <TaxDiscountSettings />
               </ProtectedRoute>
             }
@@ -111,7 +111,7 @@ function AppContent() {
           <Route
             path="/expenses"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute featureRequired="expenses">
                 <Expenses />
               </ProtectedRoute>
             }
