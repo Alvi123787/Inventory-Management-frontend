@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { resetPassword } from "../services/authService";
 
 const ResetPassword = () => {
   const { token } = useParams();
@@ -11,15 +12,7 @@ const ResetPassword = () => {
     e.preventDefault();
 
     try {
-      const res = await fetch(`http://localhost:3001/api/auth/reset-password/${token}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ newPassword }),
-      });
-
-      const data = await res.json();
+      const data = await resetPassword(token, newPassword);
       if (data.success) {
         setMessage("✅ Password reset successfully! Redirecting to login...");
         setTimeout(() => navigate("/login"), 2000);

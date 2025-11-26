@@ -132,8 +132,7 @@ function Reports() {
 
   // Subscribe to SSE for real-time refresh
   useEffect(() => {
-    const base = (import.meta.env.VITE_API_BASE_URL || "http://localhost:3001").replace("/api", "");
-    const es = new EventSource(`${base}/events`);
+    const es = new EventSource(`https://inventory-management-backend-flame.vercel.app/events`);
     es.onmessage = async (e) => {
       try {
         const msg = JSON.parse(e.data);

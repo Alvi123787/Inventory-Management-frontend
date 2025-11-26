@@ -31,8 +31,7 @@ import "./Dashboard.css"
       }
     };
     fetchOrders();
-    const base = import.meta.env.VITE_API_BASE || "http://localhost:3001";
-    const es = new EventSource(`${base}/events`);
+    const es = new EventSource(`https://inventory-management-backend-flame.vercel.app/events`);
     es.onmessage = (e) => {
       try {
         const msg = JSON.parse(e.data);

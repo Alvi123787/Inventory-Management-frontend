@@ -170,8 +170,7 @@ function Orders() {
 
   // Subscribe to SSE for real-time refresh
   useEffect(() => {
-    const base = "http://localhost:3001"; // matches backend default
-    const es = new EventSource(`${base}/events`);
+    const es = new EventSource(`https://inventory-management-backend-flame.vercel.app/events`);
     es.onmessage = (e) => {
       try {
         const msg = JSON.parse(e.data);

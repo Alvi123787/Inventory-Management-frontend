@@ -1,21 +1,10 @@
-import axios from "axios";
-
-const API_URL = "http://localhost:3001/api/expenses";
-
-// Helper function to get auth headers
-const getAuthHeaders = () => {
-  const token = localStorage.getItem('token');
-  return {
-    'Content-Type': 'application/json',
-    ...(token && { 'Authorization': `Bearer ${token}` })
-  };
-};
+import api from "../api/api";
 
 const ExpenseService = {
-  getAll: () => axios.get(API_URL, { headers: getAuthHeaders() }),
-  add: (data) => axios.post(API_URL, data, { headers: getAuthHeaders() }),
-  update: (id, data) => axios.put(`${API_URL}/${id}`, data, { headers: getAuthHeaders() }),
-  delete: (id) => axios.delete(`${API_URL}/${id}`, { headers: getAuthHeaders() }),
+  getAll: () => api.get("api/expenses"),
+  add: (data) => api.post("api/expenses", data),
+  update: (id, data) => api.put(`api/expenses/${id}`, data),
+  delete: (id) => api.delete(`api/expenses/${id}`),
 };
 
 export default ExpenseService;

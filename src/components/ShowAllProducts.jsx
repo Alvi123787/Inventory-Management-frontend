@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../api/api";
 import "./ShowAllProducts.css"; // external scoped CSS
 import { formatCurrency, getCurrencyCode } from "../utils/currency";
 
@@ -8,7 +8,6 @@ function ShowAllProducts() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const API_BASE = "http://localhost:3001/api";
 
   const getAuthHeaders = () => {
     const token = localStorage.getItem("token");
@@ -21,9 +20,7 @@ function ShowAllProducts() {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${API_BASE}/products`, {
-        headers: getAuthHeaders(),
-      });
+      const response = await api.get("api/products");
 
       if (response.data.success) {
         setProducts(response.data.data);
@@ -44,8 +41,7 @@ function ShowAllProducts() {
 
   // Subscribe to SSE for real-time refresh
   useEffect(() => {
-    const base = API_BASE.replace("/api", "");
-    const es = new EventSource(`${base}/events`);
+    const es = new EventSource(`https://inventory-management-backend-flame.vercel.app/events`);
     es.onmessage = (e) => {
       try {
         const msg = JSON.parse(e.data);

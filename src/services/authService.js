@@ -1,25 +1,21 @@
-import axios from "axios";
-
-const API_URL = "http://localhost:3001/api/auth";
+import api from "../api/api";
 
 export const login = async (email, password) => {
-  const { data } = await axios.post(`${API_URL}/login`, { email, password });
+  const { data } = await api.post("api/auth/login", { email, password });
   return data;
 };
 
-export const register = async (token, formData) => {
-  const { data } = await axios.post(`${API_URL}/register`, formData, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+export const register = async (_token, formData) => {
+  const { data } = await api.post("api/auth/register", formData);
   return data;
 };
 
 export const forgotPassword = async (email) => {
-  const { data } = await axios.post(`${API_URL}/forgot-password`, { email });
+  const { data } = await api.post("api/auth/forgot-password", { email });
   return data;
 };
 
 export const resetPassword = async (token, newPassword) => {
-  const { data } = await axios.post(`${API_URL}/reset-password/${token}`, { newPassword });
+  const { data } = await api.post(`api/auth/reset-password/${token}`, { newPassword });
   return data;
 };

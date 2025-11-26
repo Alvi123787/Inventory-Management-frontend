@@ -18,7 +18,7 @@ const ExpensesPage = () => {
   const [success, setSuccess] = useState("");
   const [filterCategory, setFilterCategory] = useState("All");
 
-  const API = import.meta.env.VITE_API_BASE_URL;
+  const API = "https://inventory-management-backend-flame.vercel.app";
 
   // Build dynamic category list from existing expenses for filtering
   const uniqueCategories = Array.from(new Set(expenses.map((exp) => exp.category)));

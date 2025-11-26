@@ -1,6 +1,6 @@
 // Products.jsx
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../api/api";
 import "./Products.css";
 import { formatCurrency } from "../utils/currency";
 
@@ -19,15 +19,6 @@ export default function Products() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const API_BASE = "http://localhost:3001/api";
-
-  const getAuthHeaders = () => {
-    const token = localStorage.getItem("token");
-    return {
-      "Content-Type": "application/json",
-      ...(token && { Authorization: `Bearer ${token}` }),
-    };
-  };
 
   useEffect(() => {
     fetchProducts();
@@ -35,8 +26,7 @@ export default function Products() {
 
   // Subscribe to SSE for real-time refresh
   useEffect(() => {
-    const base = API_BASE.replace("/api", "");
-    const es = new EventSource(`${base}/events`);
+    const es = new EventSource(`https://inventory-management-backend-flame.vercel.app/events`);
     es.onmessage = (e) => {
       try {
         const msg = JSON.parse(e.data);
@@ -55,9 +45,7 @@ export default function Products() {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${API_BASE}/products`, {
-        headers: getAuthHeaders(),
-      });
+      const response = await api.get("api/products");
       if (response.data.success) {
         setProducts(response.data.data);
       }
@@ -91,12 +79,10 @@ export default function Products() {
     setError("");
 
     try {
-      const config = { headers: getAuthHeaders() };
-
       if (editingId) {
-        await axios.put(`${API_BASE}/products/${editingId}`, formData, config);
+        await api.put(`api/products/${editingId}`, formData);
       } else {
-        await axios.post(`${API_BASE}/products`, formData, config);
+        await api.post("api/products", formData);
       }
 
       await fetchProducts();
@@ -130,9 +116,7 @@ export default function Products() {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this product?")) {
       try {
-        await axios.delete(`${API_BASE}/products/${id}`, {
-          headers: getAuthHeaders(),
-        });
+        await api.delete(`api/products/${id}`);
         await fetchProducts();
       } catch (err) {
         setError("Failed to delete product");

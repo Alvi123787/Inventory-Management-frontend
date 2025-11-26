@@ -1,7 +1,7 @@
 // Top imports inside UserManagement.jsx
 import React, { useState, useEffect } from "react";
 import { register } from "../services/authService";
-import axios from "axios";
+import api from "../api/api";
 import { useNavigate } from "react-router-dom";
 
 // Scoped CSS to prevent style leakage
@@ -185,7 +185,7 @@ const UserManagement = () => {
   
   const navigate = useNavigate();
 
-  const API_URL = "http://localhost:3001/api/auth";
+  
   const role = localStorage.getItem("role");
 
   // Fetch all users
@@ -194,14 +194,10 @@ const UserManagement = () => {
       setLoading(true);
       const token = localStorage.getItem("token");
       if (role === 'sub_admin') {
-        const { data } = await axios.get(`${API_URL}/account/users`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const { data } = await api.get(`api/auth/account/users`);
         setUsers(data.data);
       } else {
-        const { data } = await axios.get(`${API_URL}/users`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const { data } = await api.get(`api/auth/users`);
         setUsers(data.data);
       }
     } catch (error) {
@@ -218,11 +214,8 @@ const UserManagement = () => {
     }
 
     try {
-      const token = localStorage.getItem("token");
-      const url = role === 'sub_admin' ? `${API_URL}/account/users/${userId}` : `${API_URL}/users/${userId}`;
-      await axios.delete(url, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const url = role === 'sub_admin' ? `api/auth/account/users/${userId}` : `api/auth/users/${userId}`;
+      await api.delete(url);
       setMessage("User deleted successfully");
       fetchUsers(); // Refresh list
     } catch (error) {
@@ -285,13 +278,10 @@ const UserManagement = () => {
       setMessage("Select 1 or 2 roles");
       return;
     }
-    const token = localStorage.getItem("token");
     try {
       setLoading(true);
       const payload = { name: form.name, email: form.email, password: form.password, feature_roles: tempFeatureRoles };
-      await axios.post(`${API_URL}/account/users`, payload, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await api.post(`api/auth/account/users`, payload);
       setForm({ name: "", email: "", password: "", role: "user", feature_roles: [] });
       setTempFeatureRoles([]);
       setShowRoleModal(false);
