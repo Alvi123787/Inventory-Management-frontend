@@ -1,0 +1,106 @@
+.products-container {
+  background-color: var(--color-background);
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  font-family: "Inter", system-ui, sans-serif;
+}
+
+.products-title {
+  text-align: center;
+  color: var(--color-text-primary);
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+}
+
+.products-alert {
+  background-color: var(--color-danger);
+  color: #fff;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.products-alert-close {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 1.2rem;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.products-loading {
+  text-align: center;
+  margin: 2rem 0;
+}
+
+.products-empty {
+  text-align: center;
+  color: var(--color-text-secondary);
+  font-style: italic;
+}
+
+.products-table-wrapper {
+  overflow-x: auto;
+  background-color: var(--color-card-bg);
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+}
+
+.products-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.95rem;
+}
+
+.products-table thead {
+  background-color: var(--color-primary);
+  color: #fff;
+}
+
+.products-table th,
+.products-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.products-table tr:hover {
+  background-color: rgba(37, 99, 235, 0.05);
+  transition: background-color 0.2s ease;
+}
+
+.products-table th:first-child,
+.products-table td:first-child {
+  text-align: center;
+}
+
+/* Image column */
+.product-image-cell {
+  width: 64px;
+}
+
+.product-thumb {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+}
+
+.product-image-placeholder {
+  width: 48px;
+  height: 48px;
+  border-radius: 6px;
+  background: #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-secondary);
+  font-size: 10px;
+  border: 1px solid #e5e7eb;
+}

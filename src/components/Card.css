@@ -1,0 +1,83 @@
+.custom-card {
+  background-color: var(--color-card-bg);
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  border-left: 6px solid transparent;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.custom-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+}
+
+/* === Icon Circle === */
+.icon-wrapper {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #fff;
+  margin-right: 1rem;
+}
+
+/* === Text Styling === */
+.card-title {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 0.25rem;
+}
+
+.card-value {
+  font-size: 1.4rem;
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
+/* === Color Variants === */
+.primary .icon-wrapper {
+  background-color: var(--color-primary);
+}
+.primary {
+  border-left-color: var(--color-primary);
+}
+
+.secondary .icon-wrapper {
+  background-color: var(--color-secondary);
+}
+.secondary {
+  border-left-color: var(--color-secondary);
+}
+
+.accent .icon-wrapper {
+  background-color: var(--color-accent);
+}
+.accent {
+  border-left-color: var(--color-accent);
+}
+
+.success .icon-wrapper {
+  background-color: var(--color-success);
+}
+.success {
+  border-left-color: var(--color-success);
+}
+
+.warning .icon-wrapper {
+  background-color: var(--color-warning);
+}
+.warning {
+  border-left-color: var(--color-warning);
+}
+
+.danger .icon-wrapper {
+  background-color: var(--color-danger);
+}
+.danger {
+  border-left-color: var(--color-danger);
+}

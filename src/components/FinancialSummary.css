@@ -1,0 +1,44 @@
+:root {
+  --color-primary: #2563eb;
+  --color-secondary: #1e40af;
+  --color-accent: #38bdf8;
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --color-background: #f9fafb;
+  --color-card-bg: #ffffff;
+  --color-text-primary: #111827;
+  --color-text-secondary: #6b7280;
+}
+
+.financial-summary {
+  background-color: var(--color-background);
+}
+
+.fin-card {
+  background-color: var(--color-card-bg);
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: center;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.fin-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.fin-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.fin-value {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--color-primary);
+  letter-spacing: 0.5px;
+}

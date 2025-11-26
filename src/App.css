@@ -1,0 +1,19 @@
+:root {
+  /* === Base Theme Colors === */
+  --color-primary: #2563EB;           /* Main buttons, links, highlights */
+  --color-secondary: #1E40AF;         /* Navbars, sidebar backgrounds */
+  --color-accent: #38BDF8;            /* Hover states, badges */
+
+  /* === State Colors === */
+  --color-success: #22C55E;           /* Delivered / Success statuses */
+  --color-warning: #F59E0B;           /* Pending / In Process */
+  --color-danger: #EF4444;            /* Cancel / Failed deliveries */
+
+  /* === Backgrounds === */
+  --color-background: #F9FAFB;        /* Page background */
+  --color-card-bg: #FFFFFF;           /* Cards, tables, modals */
+
+  /* === Text Colors === */
+  --color-text-primary: #111827;      /* Main text */
+  --color-text-secondary: #6B7280;    /* Muted / label text */
+}

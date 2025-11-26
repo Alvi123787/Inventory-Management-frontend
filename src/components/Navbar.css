@@ -1,0 +1,311 @@
+/* Navbar.css */
+.dnb-navbar {
+  background: linear-gradient(135deg, var(--color-secondary, #1E40AF) 0%, var(--color-primary, #2563EB) 100%);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.15);
+  padding: 0.75rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.dnb-navbar-brand {
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: white !important;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.dnb-navbar-brand:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-1px);
+}
+
+/* Navbar Toggler */
+.dnb-navbar-toggler {
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 0.5rem;
+  border-radius: 6px;
+}
+
+.dnb-navbar-toggler-icon {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.8%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+/* Navigation Items */
+.dnb-navbar-nav {
+  gap: 1rem;
+  align-items: center;
+}
+
+.dnb-nav-link {
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-weight: 500;
+  padding: 0.75rem 1.25rem !important;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  position: relative;
+  text-decoration: none;
+}
+
+.dnb-nav-link:hover,
+.dnb-nav-link:focus {
+  color: white !important;
+  background: rgba(30, 64, 175, 0.18);
+  transform: translateY(-1px);
+}
+
+.dnb-nav-link.active {
+  color: white !important;
+  background: rgba(255, 255, 255, 0.22);
+  font-weight: 600;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.18) inset;
+}
+
+.dnb-nav-link.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 30px;
+  height: 2px;
+  background: var(--color-accent);
+  border-radius: 2px;
+}
+
+/* Dropdown Styles */
+.dnb-dropdown-toggle {
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-weight: 500;
+  padding: 0.75rem 1.25rem !important;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  border: none;
+  background: transparent;
+}
+
+.dnb-dropdown-toggle:hover,
+.dnb-dropdown-toggle:focus {
+  color: white !important;
+  background: rgba(30, 64, 175, 0.18);
+  transform: translateY(-1px);
+}
+
+.dnb-dropdown-toggle::after {
+  margin-left: 0.5rem;
+  border-top: 0.3em solid rgba(255, 255, 255, 0.7);
+  transition: transform 0.3s ease;
+}
+
+.dnb-dropdown-toggle.show::after {
+  transform: rotate(-180deg);
+}
+
+.dnb-dropdown-menu {
+  background: var(--color-card-bg);
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  padding: 0.5rem;
+  margin-top: 0.5rem !important;
+  min-width: 200px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.dnb-dropdown-item {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  color: var(--color-text-primary);
+  font-weight: 500;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.dnb-dropdown-item:hover {
+  background: var(--color-primary);
+  color: white;
+  transform: translateX(4px);
+}
+
+/* Right Side Actions */
+.dnb-navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+  flex-wrap: nowrap;
+}
+
+/* Buttons */
+.dnb-btn {
+  border: none;
+  padding: 0.75rem 1.25rem;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+}
+
+.dnb-action-btn {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  padding: 0.75rem;
+  border-radius: 8px;
+}
+
+.dnb-action-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.dnb-search-btn {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.dnb-search-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.dnb-login-btn {
+  background: var(--color-accent);
+  color: white;
+}
+
+.dnb-login-btn:hover {
+  background: #0ea5e9;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
+}
+
+.dnb-logout-btn {
+  background: rgba(239, 68, 68, 0.9);
+  color: white;
+  white-space: nowrap;
+  height: 36px;
+  padding: 0 16px;
+}
+
+.dnb-logout-btn:hover {
+  background: var(--color-danger);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+/* User Info */
+.dnb-user-info-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: white;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.dnb-role-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.dnb-role-badge.dnb-admin {
+  background: var(--color-warning);
+  color: white;
+}
+
+.dnb-role-badge.dnb-user {
+  background: var(--color-success);
+  color: white;
+}
+
+.dnb-role-badge.dnb-subadmin {
+  background: var(--color-primary);
+  color: white;
+}
+
+.dnb-user-name {
+  display: none;
+}
+
+/* Mobile Responsive */
+@media (max-width: 991.98px) {
+  .dnb-navbar-actions {
+    flex-direction: column;
+    gap: 0.75rem;
+    width: 100%;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .dnb-user-info-container {
+    justify-content: center;
+    text-align: center;
+  }
+  
+  .dnb-btn {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .dnb-dropdown-menu {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .dnb-dropdown-item {
+    color: rgba(255, 255, 255, 0.9);
+  }
+  
+  .dnb-dropdown-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+  }
+}
+
+/* Animation for dropdown */
+.dnb-dropdown-menu {
+  animation: dropdownFadeIn 0.2s ease;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Hover effects for all interactive elements */
+.dnb-navbar * {
+  transition: all 0.3s ease;
+}
+
+/* --- Alignment fixes for logout and name --- */
+.dnb-user-info-container {
+  white-space: nowrap;
+}
+.dnb-user-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
+}
+.dnb-logout-btn {
+  white-space: nowrap;
+  height: 36px;
+  padding: 0 16px;
+  line-height: 1;
+}

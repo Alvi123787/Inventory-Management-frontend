@@ -1,0 +1,43 @@
+/* === Reuse Global Theme Variables === */
+:root {
+  --color-primary: #2563eb;
+  --color-secondary: #1e40af;
+  --color-accent: #38bdf8;
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --color-background: #f9fafb;
+  --color-card-bg: #ffffff;
+  --color-text-primary: #111827;
+  --color-text-secondary: #6b7280;
+}
+
+/* === Chart Placeholder Styling === */
+.chart-card {
+  border-radius: 0.75rem;
+  overflow: hidden;
+  background-color: var(--color-card-bg);
+}
+
+.chart-header {
+  background-color: var(--color-background);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  color: var(--color-primary);
+  padding: 0.75rem 1rem;
+}
+
+.chart-body {
+  height: 300px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--color-background);
+  color: var(--color-text-secondary);
+  font-size: 0.95rem;
+}
+
+.chart-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+  transition: all 0.2s ease;
+}

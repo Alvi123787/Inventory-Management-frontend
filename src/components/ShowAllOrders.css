@@ -1,0 +1,198 @@
+/* ShowAllOrders.css */
+/* === Global Container === */
+.all-orders-container {
+  max-width: 1200px;
+}
+
+.all-orders-title {
+  font-weight: 700;
+  color: #333;
+}
+
+/* === Error Message === */
+.all-orders-error {
+  font-size: 0.95rem;
+  border-left: 4px solid #dc3545;
+}
+
+/* === Loading Spinner === */
+.all-orders-loading p {
+  font-size: 0.9rem;
+}
+
+/* === Order Cards === */
+.all-orders-card {
+  transition: all 0.3s ease;
+  border-radius: 10px;
+}
+
+.all-orders-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+}
+
+.all-orders-customer {
+  font-size: 1.1rem;
+  color: #222;
+  font-weight: 600;
+}
+
+.all-orders-product,
+.all-orders-price {
+  font-size: 0.9rem;
+  color: #555;
+}
+
+/* === Badges === */
+.all-orders-badge-status,
+.all-orders-badge-payment {
+  font-size: 0.75rem;
+  padding: 5px 10px;
+  border-radius: 8px;
+}
+
+/* === Date === */
+.all-orders-date {
+  font-size: 0.85rem;
+}
+
+/* === Button === */
+.all-orders-btn {
+  border-radius: 8px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.all-orders-btn:hover {
+  background-color: #0d6efd;
+  color: #fff;
+}
+
+/* === Empty State === */
+.all-orders-empty i {
+  color: #ccc;
+}
+
+/* === Modal === */
+.all-orders-modal {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.all-orders-modal .modal-header {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.all-orders-modal .modal-title {
+  font-weight: 600;
+  color: #333;
+}
+
+.all-orders-modal .modal-body p {
+  margin-bottom: 0.5rem;
+}
+
+.all-orders-modal .modal-footer {
+  border-top: 1px solid #dee2e6;
+}
+
+/* === Responsive Design === */
+@media (max-width: 768px) {
+  .all-orders-grid {
+    gap: 1rem;
+  }
+  
+  .all-orders-card {
+    margin-bottom: 1rem;
+  }
+  
+  .all-orders-modal .modal-dialog {
+    margin: 1rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .all-orders-container {
+    padding: 0 15px;
+  }
+  
+  .all-orders-title {
+    font-size: 1.5rem;
+  }
+  
+  .all-orders-customer {
+    font-size: 1rem;
+  }
+  
+  .all-orders-product,
+  .all-orders-price {
+    font-size: 0.85rem;
+  }
+}
+
+/* === Animation Enhancements === */
+.all-orders-card {
+  animation: allOrdersCardFadeIn 0.5s ease-out;
+}
+
+@keyframes allOrdersCardFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.all-orders-modal {
+  animation: allOrdersModalSlideIn 0.3s ease-out;
+}
+
+@keyframes allOrdersModalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* === Custom Styling Enhancements === */
+.all-orders-badge-status.bg-success {
+  background: linear-gradient(135deg, #28a745, #20c997) !important;
+}
+
+.all-orders-badge-status.bg-warning {
+  background: linear-gradient(135deg, #ffc107, #fd7e14) !important;
+}
+
+.all-orders-badge-status.bg-danger {
+  background: linear-gradient(135deg, #dc3545, #e83e8c) !important;
+}
+
+.all-orders-badge-status.bg-info {
+  background: linear-gradient(135deg, #17a2b8, #6f42c1) !important;
+}
+
+.all-orders-badge-payment.bg-success {
+  background: linear-gradient(135deg, #28a745, #198754) !important;
+}
+
+.all-orders-badge-payment.bg-danger {
+  background: linear-gradient(135deg, #dc3545, #c82333) !important;
+}
+
+.all-orders-btn {
+  background: linear-gradient(135deg, transparent, transparent);
+  border: 2px solid #0d6efd;
+  font-weight: 500;
+}
+
+.all-orders-btn:hover {
+  background: linear-gradient(135deg, #0d6efd, #0a58ca);
+  border-color: #0a58ca;
+}

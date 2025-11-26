@@ -1,0 +1,254 @@
+/* Status Badges Container */
+.status-badges {
+    background-color: var(--color-card-bg);
+    border-radius: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.status-badges h5 {
+    color: var(--color-text-primary);
+    font-weight: 700;
+    font-size: 1.25rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid var(--color-primary);
+}
+
+.status-badges h6 {
+    color: var(--color-text-secondary);
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+}
+
+/* Overview Cards */
+.status-badges .card {
+    background: linear-gradient(135deg, var(--color-card-bg) 0%, rgba(248, 250, 252, 0.8) 100%);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0, 0, 0, 0.03);
+}
+
+.status-badges .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+}
+
+.status-badges .card-body {
+    padding: 1rem;
+}
+
+.status-badges .card-title {
+    color: var(--color-text-secondary);
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-badges .card h5 {
+    color: inherit;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+    border: none;
+    padding: 0;
+}
+
+/* Color Classes for Overview Cards */
+.text-primary {
+    color: var(--color-primary) !important;
+}
+
+.text-success {
+    color: var(--color-success) !important;
+}
+
+.text-warning {
+    color: var(--color-warning) !important;
+}
+
+.text-info {
+    color: var(--color-accent) !important;
+}
+
+.text-danger {
+    color: var(--color-danger) !important;
+}
+
+.text-secondary {
+    color: var(--color-text-secondary) !important;
+}
+
+/* Badges Grid Layout */
+.badges-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 0.75rem;
+}
+
+/* Badge Items */
+.badge-item {
+    background: linear-gradient(135deg, var(--color-card-bg) 0%, rgba(248, 250, 252, 0.9) 100%);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    position: relative;
+    overflow: hidden;
+}
+
+.badge-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.6s;
+}
+
+.badge-item:hover::before {
+    transform: translateX(100%);
+}
+
+.badge-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+.badge-item span:first-child {
+    color: var(--color-text-primary);
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.badge-item span:last-child {
+    color: var(--color-text-primary);
+    font-weight: 700;
+    font-size: 1rem;
+    min-width: 2rem;
+    text-align: center;
+    background: rgba(0, 0, 0, 0.03);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+}
+
+/* Loading State */
+.status-badges .text-muted {
+    color: var(--color-text-secondary) !important;
+}
+
+.status-badges .spinner-border.text-primary {
+    color: var(--color-primary) !important;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .status-badges {
+        padding: 1rem !important;
+    }
+
+    .status-badges h5 {
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+    }
+
+    .status-badges h6 {
+        font-size: 0.9rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .badges-grid {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+
+    .badge-item {
+        padding: 0.75rem 1rem !important;
+    }
+
+    .badge-item span:first-child {
+        font-size: 0.85rem;
+    }
+
+    .badge-item span:last-child {
+        font-size: 0.9rem;
+        min-width: 1.75rem;
+    }
+
+    .status-badges .card-body {
+        padding: 0.75rem;
+    }
+
+    .status-badges .card h5 {
+        font-size: 1.25rem;
+    }
+
+    .status-badges .card-title {
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .status-badges .row > [class*="col-"] {
+        margin-bottom: 0.5rem;
+    }
+
+    .status-badges .card {
+        margin-bottom: 0.5rem;
+    }
+}
+
+/* Animation for card entrance */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.status-badges .card,
+.badge-item {
+    animation: fadeInUp 0.5s ease-out;
+}
+
+/* Staggered animation for badge items */
+.badge-item:nth-child(1) { animation-delay: 0.1s; }
+.badge-item:nth-child(2) { animation-delay: 0.2s; }
+.badge-item:nth-child(3) { animation-delay: 0.3s; }
+.badge-item:nth-child(4) { animation-delay: 0.4s; }
+.badge-item:nth-child(5) { animation-delay: 0.5s; }
+.badge-item:nth-child(6) { animation-delay: 0.6s; }
+.badge-item:nth-child(7) { animation-delay: 0.7s; }
+.badge-item:nth-child(8) { animation-delay: 0.8s; }
+.badge-item:nth-child(9) { animation-delay: 0.9s; }
+.badge-item:nth-child(10) { animation-delay: 1s; }
+.badge-item:nth-child(11) { animation-delay: 1.1s; }
+.badge-item:nth-child(12) { animation-delay: 1.2s; }
+
+/* Print Styles */
+@media print {
+    .status-badges {
+        box-shadow: none !important;
+        border: 1px solid #ccc !important;
+        break-inside: avoid;
+    }
+
+    .status-badges .card,
+    .badge-item {
+        box-shadow: none !important;
+        border: 1px solid #ddd !important;
+    }
+
+    .badge-item:hover {
+        transform: none !important;
+    }
+}

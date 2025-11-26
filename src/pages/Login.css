@@ -1,0 +1,351 @@
+/* Login Container */
+.auth-container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, var(--color-background) 0%, #f0f4f8 100%);
+    padding: 2rem 1rem;
+    position: relative;
+}
+
+.auth-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="rgba(37, 99, 235, 0.03)"><circle cx="50" cy="50" r="2"/></svg>') repeat;
+    background-size: 50px 50px;
+    pointer-events: none;
+    /* ✅ fixes link unclickable issue */
+}
+
+
+/* Login Card */
+.auth-container h2 {
+    color: var(--color-text-primary);
+    font-weight: 700;
+    font-size: 2rem;
+    margin-bottom: 2rem;
+    text-align: center;
+    position: relative;
+}
+
+.auth-container h2::after {
+    content: '';
+    position: absolute;
+    bottom: -0.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+    border-radius: 2px;
+}
+
+/* Form Styles */
+.auth-container form {
+    background: var(--color-card-bg);
+    padding: 2.5rem;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    width: 100%;
+    max-width: 400px;
+    position: relative;
+    backdrop-filter: blur(10px);
+}
+
+/* Input Fields */
+.auth-container input {
+    width: 100%;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.25rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: var(--color-card-bg);
+    color: var(--color-text-primary);
+    box-sizing: border-box;
+}
+
+.auth-container input::placeholder {
+    color: var(--color-text-secondary);
+    opacity: 0.7;
+}
+
+.auth-container input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    transform: translateY(-1px);
+}
+
+.auth-container input:hover {
+    border-color: #cbd5e0;
+}
+
+/* Submit Button */
+.auth-container button {
+    width: 100%;
+    padding: 1rem 1.25rem;
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 0.5rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-container button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.auth-container button:hover::before {
+    left: 100%;
+}
+
+.auth-container button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.3);
+}
+
+.auth-container button:active {
+    transform: translateY(0);
+}
+
+.auth-container button:disabled {
+    background: #cbd5e0;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.auth-container button:disabled::before {
+    display: none;
+}
+
+/* Message Styles */
+.auth-container p {
+    text-align: center;
+    margin-top: 1.5rem;
+    padding: 1rem;
+    border-radius: 8px;
+    font-weight: 500;
+    width: 100%;
+    max-width: 400px;
+}
+
+.auth-container p:not(:empty) {
+    background: var(--color-success);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.auth-container p:empty {
+    display: none;
+}
+
+/* Error State */
+.auth-container input:invalid:not(:focus):not(:placeholder-shown) {
+    border-color: var(--color-danger);
+    background-color: rgba(239, 68, 68, 0.02);
+}
+
+/* Loading State */
+.auth-container button.loading {
+    position: relative;
+    color: transparent;
+}
+
+.auth-container button.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    height: 20px;
+    border: 2px solid transparent;
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* Animations */
+@keyframes spin {
+    0% {
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+
+    100% {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.auth-container form {
+    animation: slideIn 0.6s ease-out;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .auth-container {
+        padding: 1rem;
+    }
+
+    .auth-container form {
+        padding: 2rem 1.5rem;
+        margin: 0 1rem;
+    }
+
+    .auth-container h2 {
+        font-size: 1.75rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .auth-container input,
+    .auth-container button {
+        padding: 0.875rem 1rem;
+        font-size: 0.95rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .auth-container form {
+        padding: 1.5rem 1rem;
+    }
+
+    .auth-container h2 {
+        font-size: 1.5rem;
+    }
+
+    .auth-container input,
+    .auth-container button {
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+    }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    .auth-container {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    }
+
+    .auth-container input {
+        background: #334155;
+        border-color: #475569;
+        color: white;
+    }
+
+    .auth-container input::placeholder {
+        color: #94a3b8;
+    }
+
+    .auth-container input:focus {
+        border-color: var(--color-primary);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+    }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+    .auth-container input {
+        border-width: 3px;
+    }
+
+    .auth-container button {
+        border: 2px solid white;
+    }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+
+    .auth-container button::before,
+    .auth-container form {
+        animation: none;
+    }
+
+    .auth-container button:hover {
+        transform: none;
+    }
+
+    .auth-container input:focus {
+        transform: none;
+    }
+}
+
+/* Focus Accessibility */
+.auth-container input:focus-visible,
+.auth-container button:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+/* Print Styles */
+@media print {
+    .auth-container {
+        background: white !important;
+    }
+
+    .auth-container form {
+        box-shadow: none;
+        border: 2px solid #000;
+    }
+
+    .auth-container button {
+        background: #000 !important;
+        color: white !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+}
+
+/* Forgot Password Link */
+.auth-container a {
+    color: var(--color-primary);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s ease, transform 0.2s ease;
+    margin-top: 0.75rem;
+    display: inline-block;
+}
+
+.auth-container a:hover {
+    color: var(--color-accent);
+    transform: translateY(-1px);
+    text-decoration: underline;
+}
+
+.auth-container a:active {
+    transform: translateY(0);
+}
