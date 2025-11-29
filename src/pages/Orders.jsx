@@ -1,5 +1,6 @@
 // pages/Orders.jsx
 import React, { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import OrderService from "../services/orderService";
 import ProductService from "../services/productService";
 import DropdownService from "../services/dropdownService";
@@ -31,6 +32,7 @@ function Orders() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [products, setProducts] = useState([]);
+  const [productsSnapshot, setProductsSnapshot] = useState(null);
   const [orderItems, setOrderItems] = useState([{ productId: "", quantity: 1 }]);
   const [didRestoreOnEdit, setDidRestoreOnEdit] = useState(false);
 
@@ -50,6 +52,7 @@ function Orders() {
   const [addNewModal, setAddNewModal] = useState({ open: false, target: null, value: "" });
   const [partialPaidModal, setPartialPaidModal] = useState({ open: false, value: "" });
   const [partialPaidAmount, setPartialPaidAmount] = useState(0);
+  const location = useLocation();
 
   // Custom Dropdown With Delete
   const DropdownWithDelete = ({ label, name, value, options, onSelect, onAddNew, allowAddNew = true, target }) => {
@@ -168,6 +171,15 @@ function Orders() {
     fetchDropdownOptions();
   }, []);
 
+  // If navigated with an order to edit, start edit automatically
+  useEffect(() => {
+    const incoming = location.state && location.state.editOrder;
+    if (incoming) {
+      handleEdit(incoming);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Subscribe to SSE for real-time refresh
   useEffect(() => {
     const es = new EventSource(`https://inventory-management-backend-flame.vercel.app/events`);
@@ -205,11 +217,16 @@ function Orders() {
     try {
       const response = await ProductService.getAll();
       const list = response?.data?.data || [];
-      setProducts(Array.isArray(list) ? list : []);
+      const normalized = Array.isArray(list) ? list : [];
+      setProducts(normalized);
+      setProductsSnapshot(normalized);
+      return normalized;
     } catch (err) {
       console.error("Failed to fetch products:", err);
       setError("Failed to load products. Please try again.");
       setProducts([]);
+      setProductsSnapshot([]);
+      return [];
     }
   };
 
@@ -308,12 +325,7 @@ function Orders() {
 
   const submitPartialPaid = () => {
     const val = Number(partialPaidModal.value || 0);
-    const total = orderItems.reduce((sum, it) => {
-      const p = getProductById(it.productId);
-      const price = Number(p?.price ?? 0);
-      const qty = Number(it.quantity || 0);
-      return sum + (price * qty);
-    }, 0);
+    const total = calculateItemsTotal(orderItems);
     const clamped = Math.max(0, Math.min(val, total));
     setPartialPaidAmount(clamped);
     setPartialPaidModal({ open: false, value: "" });
@@ -402,7 +414,11 @@ function Orders() {
           ? (Number.isFinite(stock) ? (didRestoreOnEdit ? stock : prevQty + stock) : Infinity)
           : stock;
         const clamped = Number.isFinite(maxQty) ? Math.min(baseQty, maxQty) : baseQty;
+        // When selecting a product, use the product's default price (no per-order custom price)
         next[index] = { ...current, productId: Number(value), quantity: clamped, prevQuantity: prevQty };
+      } else if (field === "customPrice") {
+        // (customPrice removed) ignore
+        return prev;
       } else {
         next[index] = { ...current, [field]: Number(value) };
       }
@@ -411,7 +427,23 @@ function Orders() {
   };
 
   const getProductById = (id) => {
-    return products.find((p) => Number(p.id) === Number(id));
+    const source = Array.isArray(productsSnapshot) ? productsSnapshot : products;
+    return source.find((p) => Number(p.id) === Number(id));
+  };
+
+  // Get the effective price for an item (custom price if set, otherwise product price)
+  const getItemPrice = (item) => {
+    const product = getProductById(item.productId);
+    return Number(product?.price ?? 0);
+  };
+
+  // Calculate total for items (using custom prices if set)
+  const calculateItemsTotal = (items) => {
+    return items.reduce((sum, it) => {
+      const price = getItemPrice(it);
+      const qty = Number(it.quantity || 0);
+      return sum + (price * qty);
+    }, 0);
   };
 
   const resetForm = () => {
@@ -487,10 +519,14 @@ function Orders() {
 
         const itemsForBackend = selectedItems.map((it) => {
           const p = getProductById(it.productId);
+          // Use product's base price (customPrice removed)
+          const rawPrice = Number(p?.price ?? 0);
+          // Round to 2 decimal places to avoid floating point drift when saving
+          const effectivePrice = Number(Number(rawPrice || 0).toFixed(2));
           return {
             name: p?.name || `#${it.productId}`,
             quantity: Number(it.quantity || 1),
-            price: Number(p?.price ?? 0),
+            price: effectivePrice,
             product_id: Number(p?.id ?? it.productId) || null
           };
         });
@@ -566,24 +602,27 @@ function Orders() {
       const raw = typeof order.products === "string"
         ? JSON.parse(order.products || "[]")
         : (order.products || []);
+      const sourceProducts = Array.isArray(productsSnapshot) ? productsSnapshot : products;
       const items = (Array.isArray(raw) ? raw : []).map((it) => {
         const externalName = String(it.name || it.external_name || "").trim();
         let pid = it.product_id != null ? Number(it.product_id) : "";
         if (!pid && externalName) {
-          const match = products.find(
+          const match = sourceProducts.find(
             (p) => String(p.name || "").toLowerCase() === externalName.toLowerCase()
           );
           if (match) pid = Number(match.id);
         }
+        // Map to local item shape (no customPrice)
         return {
           productId: pid || "",
-          quantity: 0, // reset to 0 on edit
-          prevQuantity: Number(it.quantity || 0),
+          // prefill quantity with existing order quantity so updates include current items
+          quantity: Number(it.quantity || 0),
+          prevQuantity: Number(it.quantity || 0)
         };
       });
-      setOrderItems(items.length ? items : [{ productId: "", quantity: 0, prevQuantity: 0 }]);
+      setOrderItems(items.length ? items : [{ productId: "", quantity: 0, prevQuantity: 0, customPrice: null }]);
     } catch (e) {
-      setOrderItems([{ productId: "", quantity: 0, prevQuantity: 0 }]);
+      setOrderItems([{ productId: "", quantity: 0, prevQuantity: 0, customPrice: null }]);
     }
 
     setError("");
@@ -885,8 +924,7 @@ function Orders() {
                     <div className={styles["orders-item-field"]}>
                       <label>Price</label>
                       <input
-                        value={product ? formatCurrency(parseFloat(product.price).toFixed(2)) : ""}
-                        placeholder="-"
+                        value={product ? formatCurrency(Number(product.price).toFixed(2)) : ""}
                         readOnly
                       />
                     </div>
@@ -922,114 +960,66 @@ function Orders() {
                 <div className={styles["orders-item-field"]}>
                   <label>Total (Items)</label>
                   <input
-                    value={formatCurrency(orderItems.reduce((sum, it) => {
-                      const p = getProductById(it.productId);
-                      const price = Number(p?.price ?? 0);
-                      const qty = Number(it.quantity || 0);
-                      return sum + (price * qty);
-                    }, 0).toFixed(2))}
+                    value={formatCurrency(calculateItemsTotal(orderItems).toFixed(2))}
                     readOnly
                   />
                 </div>
-                <div className={styles["orders-item-field"]}>
-                  <label>Paid Amount</label>
-                  {formData.paymentStatus === "Partial Paid" ? (
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      value={Number(partialPaidAmount || 0)}
-                      onChange={(e) => {
-                        const val = Number(e.target.value || 0);
-                        const total = orderItems.reduce((sum, it) => {
-                          const p = getProductById(it.productId);
-                          const price = Number(p?.price ?? 0);
-                          const qty = Number(it.quantity || 0);
-                          return sum + (price * qty);
-                        }, 0);
-                        const clamped = Math.max(0, Math.min(val, total));
-                        setPartialPaidAmount(clamped);
-                      }}
-                    />
-                  ) : (
-                    <input
-                      value={formatCurrency(Number(partialPaidAmount || 0).toFixed(2))}
-                      readOnly
-                    />
-                  )}
-                </div>
-                <div className={styles["orders-item-field"]}>
-                  <label>Unpaid Amount</label>
-                  {formData.paymentStatus === "Partial Paid" ? (
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      value={(() => {
-                        const total = orderItems.reduce((sum, it) => {
-                          const p = getProductById(it.productId);
-                          const price = Number(p?.price ?? 0);
-                          const qty = Number(it.quantity || 0);
-                          return sum + (price * qty);
-                        }, 0);
-                        const remaining = Math.max(0, total - Number(partialPaidAmount || 0));
-                        return Number(remaining.toFixed(2));
-                      })()}
-                      onChange={(e) => {
-                        const newRemaining = Number(e.target.value || 0);
-                        const total = orderItems.reduce((sum, it) => {
-                          const p = getProductById(it.productId);
-                          const price = Number(p?.price ?? 0);
-                          const qty = Number(it.quantity || 0);
-                          return sum + (price * qty);
-                        }, 0);
-                        const clampedRemaining = Math.max(0, Math.min(newRemaining, total));
-                        const newPaid = Math.max(0, total - clampedRemaining);
-                        setPartialPaidAmount(newPaid);
-                      }}
-                    />
-                  ) : (
-                    <input
-                      value={(() => {
-                        const total = orderItems.reduce((sum, it) => {
-                          const p = getProductById(it.productId);
-                          const price = Number(p?.price ?? 0);
-                          const qty = Number(it.quantity || 0);
-                          return sum + (price * qty);
-                        }, 0);
-                        const remaining = Math.max(0, total - Number(partialPaidAmount || 0));
-                        return formatCurrency(remaining.toFixed(2));
-                      })()}
-                      readOnly
-                    />
-                  )}
-                </div>
-                <div className={styles["orders-item-field"]}>
+                {formData.paymentStatus === "Partial Paid" && (
+                  <>
+                    <div className={styles["orders-item-field"]}>
+                      <label>Paid Amount</label>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={Number(partialPaidAmount || 0)}
+                        onChange={(e) => {
+                          const val = Number(e.target.value || 0);
+                          const total = calculateItemsTotal(orderItems);
+                          const clamped = Math.max(0, Math.min(val, total));
+                          setPartialPaidAmount(clamped);
+                        }}
+                      />
+                    </div>
+
+                    <div className={styles["orders-item-field"]}>
+                      <label>Unpaid Amount</label>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={(() => {
+                          const total = calculateItemsTotal(orderItems);
+                          const remaining = Math.max(0, total - Number(partialPaidAmount || 0));
+                          return Number(remaining.toFixed(2));
+                        })()}
+                        onChange={(e) => {
+                          const newRemaining = Number(e.target.value || 0);
+                          const total = calculateItemsTotal(orderItems);
+                          const clampedRemaining = Math.max(0, Math.min(newRemaining, total));
+                          const newPaid = Math.max(0, total - clampedRemaining);
+                          setPartialPaidAmount(newPaid);
+                        }}
+                      />
+                    </div>
+
+                    <div className={styles["orders-item-field"]}>
                       <label>Remaining</label>
                       <input
                         value={(() => {
-                          const total = orderItems.reduce((sum, it) => {
-                            const p = getProductById(it.productId);
-                            const price = Number(p?.price ?? 0);
-                            const qty = Number(it.quantity || 0);
-                            return sum + (price * qty);
-                          }, 0);
+                          const total = calculateItemsTotal(orderItems);
                           const remaining = Math.max(0, total - Number(partialPaidAmount || 0));
                           return formatCurrency(remaining.toFixed(2));
                         })()}
                         readOnly
                       />
                     </div>
+
                     <div className={styles["orders-item-field"]}>
                       <label>Net Sales</label>
                       <input
                         value={(() => {
-                          const total = orderItems.reduce((sum, it) => {
-                            const p = getProductById(it.productId);
-                            const price = Number(p?.price ?? 0);
-                            const qty = Number(it.quantity || 0);
-                            return sum + (price * qty);
-                          }, 0);
+                          const total = calculateItemsTotal(orderItems);
                           const net = formData.paymentStatus === "Paid" ? total
                             : formData.paymentStatus === "Partial Paid" ? Number(partialPaidAmount || 0)
                             : 0;
@@ -1038,6 +1028,8 @@ function Orders() {
                         readOnly
                       />
                     </div>
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -1163,7 +1155,17 @@ function Orders() {
                       <td>{order.channel || '-'}</td>
                       <td>{order.courier || '-'}</td>
                       <td className={styles["orders-products-cell"]}>{order.product_title}</td>
-                      <td>{formatCurrency(order.price)}</td>
+                      <td>{(() => {
+                        try {
+                          const items = typeof order.products === "string" ? JSON.parse(order.products || "[]") : (order.products || []);
+                          const total = order.total_price != null
+                            ? Number(order.total_price)
+                            : (Array.isArray(items) ? items.reduce((sum, it) => sum + Number(it.price || 0) * Number(it.quantity || 1), 0) : Number(order.price || 0));
+                          return formatCurrency(Number(total || 0).toFixed(2));
+                        } catch {
+                          return formatCurrency(Number(order.total_price ?? order.price ?? 0).toFixed(2));
+                        }
+                      })()}</td>
                       <td>
                         <span className={`${styles["orders-status-badge"]} ${styles[`orders-status-${order.status?.toLowerCase().replace(' ', '-')}`] || ""}`}>
                           {order.status}
@@ -1177,7 +1179,7 @@ function Orders() {
                             </span>
                             {(() => {
                               const paid = Number(order.partial_paid_amount ?? order.partialPaidAmount ?? 0) || 0;
-                              const total = Number(order.price || 0) || 0;
+                              const total = Number(order.total_price ?? order.price ?? 0) || 0;
                               const unpaid = Math.max(0, total - paid);
                               return (
                                 <small>

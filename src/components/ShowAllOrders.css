@@ -56,6 +56,11 @@
   font-size: 0.85rem;
 }
 
+/* === Tracking ID === */
+.all-orders-tracking {
+  font-size: 0.85rem;
+}
+
 /* === Button === */
 .all-orders-btn {
   border-radius: 8px;

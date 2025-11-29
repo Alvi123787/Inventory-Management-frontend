@@ -28,8 +28,8 @@ class OrderService {
 
         // Compute total price if missing
         const computedTotal = items.reduce((sum, it) => sum + Number(it.price || 0) * Number(it.quantity || 1), 0);
-        const priceRaw = o.price ?? o.total_price ?? computedTotal;
-        const price = Number(isNaN(Number(priceRaw)) ? 0 : Number(priceRaw)).toFixed(2);
+        const totalRaw = o.total_price ?? computedTotal ?? o.price;
+        const total = Number(isNaN(Number(totalRaw)) ? 0 : Number(totalRaw)).toFixed(2);
 
         // Normalize date
         const date = o.date ?? o.created_at ?? o.updated_at ?? null;
@@ -37,7 +37,8 @@ class OrderService {
         return {
           ...o,
           product_title: productTitle,
-          price: Number(price),
+          total_price: Number(total),
+          price: Number(total),
           date,
         };
       });

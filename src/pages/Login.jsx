@@ -12,13 +12,19 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const email = String(form.email || "").trim().toLowerCase();
+    const password = String(form.password || "").trim();
+    if (!email || !password) {
+      setMessage("Email and password are required");
+      return;
+    }
     try {
-      const data = await login(form.email, form.password);
+      const data = await login(email, password);
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
       localStorage.setItem("role", data.user.role);
       setMessage("Login successful!");
-      navigate("/"); // Redirect to dashboard after login
+      navigate("/");
     } catch (err) {
       setMessage(err.response?.data?.message || "Login failed");
     }

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import OrderService from "../services/orderService";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./ShowAllOrders.css";
@@ -9,6 +10,7 @@ function ShowAllOrders() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchOrders();
@@ -58,7 +60,7 @@ function ShowAllOrders() {
                       <strong>Product:</strong> {order.product_title}
                     </p>
                     <p className="all-orders-price mb-1">
-                      <strong>Price:</strong> {formatCurrency(order.price)}
+                      <strong>Total:</strong> {formatCurrency(order.total_price ?? order.price)}
                     </p>
 
                     <div className="all-orders-status d-flex justify-content-between align-items-center mb-2">
@@ -89,14 +91,27 @@ function ShowAllOrders() {
                       {order.date ? new Date(order.date).toLocaleDateString() : "-"}
                     </p>
 
-                    <button
-                      className="all-orders-btn btn btn-outline-primary btn-sm w-100"
-                      onClick={() => setSelectedOrder(order)}
-                      data-bs-toggle="modal"
-                      data-bs-target="#allOrdersDetailsModal"
-                    >
-                      View Details
-                    </button>
+                    <p className="all-orders-tracking small text-muted mb-2">
+                      <strong>Tracking ID:</strong>{" "}
+                      {order.tracking_id || "-"}
+                    </p>
+
+                    <div className="d-grid gap-2">
+                      <button
+                        className="all-orders-btn btn btn-outline-primary btn-sm w-100"
+                        onClick={() => setSelectedOrder(order)}
+                        data-bs-toggle="modal"
+                        data-bs-target="#allOrdersDetailsModal"
+                      >
+                        View Details
+                      </button>
+                      <button
+                        className="btn btn-outline-warning btn-sm w-100"
+                        onClick={() => navigate('/orders', { state: { editOrder: order } })}
+                      >
+                        Edit
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -137,7 +152,7 @@ function ShowAllOrders() {
                     <p><strong>Customer:</strong> {selectedOrder.customer_name}</p>
                     <p><strong>Phone:</strong> {selectedOrder.phone}</p>
                     <p><strong>Product:</strong> {selectedOrder.product_title}</p>
-                    <p><strong>Price:</strong> {formatCurrency(selectedOrder.price)}</p>
+                    <p><strong>Total:</strong> {formatCurrency(selectedOrder.total_price ?? selectedOrder.price)}</p>
                   </div>
                   <div className="col-md-6">
                     <p><strong>Status:</strong> {selectedOrder.status}</p>

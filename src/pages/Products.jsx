@@ -14,6 +14,7 @@ export default function Products() {
     discount_rate: "",
     stock: "",
     image_url: "",
+    product_date: "",
   });
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -86,7 +87,7 @@ export default function Products() {
       }
 
       await fetchProducts();
-      setFormData({ name: "", cost: "", price: "", discount_rate: "", stock: "", image_url: "" });
+      setFormData({ name: "", cost: "", price: "", discount_rate: "", stock: "", image_url: "", product_date: "" });
       setEditingId(null);
     } catch (err) {
       const status = err?.response?.status;
@@ -109,6 +110,7 @@ export default function Products() {
       discount_rate: product.discount_rate ?? 0,
       stock: product.stock,
       image_url: product.image_url || "",
+      product_date: product.product_date || "",
     });
     setEditingId(product.id);
   };
@@ -127,7 +129,7 @@ export default function Products() {
 
   const handleCancel = () => {
     setEditingId(null);
-    setFormData({ name: "", cost: "", price: "", discount_rate: "", stock: "", image_url: "" });
+    setFormData({ name: "", cost: "", price: "", discount_rate: "", stock: "", image_url: "", product_date: "" });
   };
 
   return (
@@ -241,6 +243,17 @@ export default function Products() {
                 </div>
               )}
             </div>
+
+            <div className="inventory-products-form__group">
+              <label className="inventory-products-form__label">Product Date</label>
+              <input
+                type="date"
+                name="product_date"
+                value={formData.product_date}
+                onChange={handleChange}
+                className="inventory-products-form__input"
+              />
+            </div>
           </div>
 
           <div className="inventory-products-form__actions">
@@ -305,6 +318,7 @@ export default function Products() {
                   <th className="inventory-products-table__header">Sale Price</th>
                   <th className="inventory-products-table__header">Discount (%)</th>
                   <th className="inventory-products-table__header">Stock</th>
+                  <th className="inventory-products-table__header">Product Date</th>
                   <th className="inventory-products-table__header">Actions</th>
                 </tr>
               </thead>
@@ -326,6 +340,9 @@ export default function Products() {
                       <span className={`inventory-products-stock-badge ${product.stock <= 5 ? 'inventory-products-stock-badge--low' : ''}`}>
                         {product.stock}
                       </span>
+                    </td>
+                    <td className="inventory-products-table__cell">
+                      {product.product_date ? new Date(product.product_date).toLocaleDateString() : "-"}
                     </td>
                     <td className="inventory-products-table__cell">
                       <div className="inventory-products-actions">

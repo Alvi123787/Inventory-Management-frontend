@@ -1,7 +1,11 @@
 import api from "../api/api";
 
 export const login = async (email, password) => {
-  const { data } = await api.post("api/auth/login", { email, password });
+  const payload = {
+    email: String(email || "").trim().toLowerCase(),
+    password: String(password || "").trim(),
+  };
+  const { data } = await api.post("/api/auth/login", payload);
   return data;
 };
 
