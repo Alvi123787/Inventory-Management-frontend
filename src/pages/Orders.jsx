@@ -949,91 +949,84 @@ function Orders() {
           </div>
         </div>
 
-        {/* Totals Summary */}
-        <div className={styles["orders-form-section"]}>
-          <div className={styles["orders-section-header"]}>
-            <h3>Totals</h3>
-          </div>
-          <div className={styles["orders-items-list"]}>
-            <div className={styles["orders-item-row"]}>
-              <div className={styles["orders-item-grid"]}>
-                <div className={styles["orders-item-field"]}>
-                  <label>Total (Items)</label>
-                  <input
-                    value={formatCurrency(calculateItemsTotal(orderItems).toFixed(2))}
-                    readOnly
-                  />
+        {/* Totals Summary (visible only for Partial Paid) */}
+        {formData.paymentStatus === "Partial Paid" && (
+          <div className={styles["orders-form-section"]}>
+            <div className={styles["orders-section-header"]}>
+              <h3>Totals</h3>
+            </div>
+            <div className={styles["orders-items-list"]}>
+              <div className={styles["orders-item-row"]}>
+                <div className={styles["orders-item-grid"]}>
+                  <div className={styles["orders-item-field"]}>
+                    <label>Total (Items)</label>
+                    <input
+                      value={formatCurrency(calculateItemsTotal(orderItems).toFixed(2))}
+                      readOnly
+                    />
+                  </div>
+                  <div className={styles["orders-item-field"]}>
+                    <label>Paid Amount</label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={Number(partialPaidAmount || 0)}
+                      onChange={(e) => {
+                        const val = Number(e.target.value || 0);
+                        const total = calculateItemsTotal(orderItems);
+                        const clamped = Math.max(0, Math.min(val, total));
+                        setPartialPaidAmount(clamped);
+                      }}
+                    />
+                  </div>
+                  <div className={styles["orders-item-field"]}>
+                    <label>Unpaid Amount</label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={(() => {
+                        const total = calculateItemsTotal(orderItems);
+                        const remaining = Math.max(0, total - Number(partialPaidAmount || 0));
+                        return Number(remaining.toFixed(2));
+                      })()}
+                      onChange={(e) => {
+                        const newRemaining = Number(e.target.value || 0);
+                        const total = calculateItemsTotal(orderItems);
+                        const clampedRemaining = Math.max(0, Math.min(newRemaining, total));
+                        const newPaid = Math.max(0, total - clampedRemaining);
+                        setPartialPaidAmount(newPaid);
+                      }}
+                    />
+                  </div>
+                  <div className={styles["orders-item-field"]}>
+                    <label>Remaining</label>
+                    <input
+                      value={(() => {
+                        const total = calculateItemsTotal(orderItems);
+                        const remaining = Math.max(0, total - Number(partialPaidAmount || 0));
+                        return formatCurrency(remaining.toFixed(2));
+                      })()}
+                      readOnly
+                    />
+                  </div>
+                  <div className={styles["orders-item-field"]}>
+                    <label>Net Sales</label>
+                    <input
+                      value={(() => {
+                        const total = calculateItemsTotal(orderItems);
+                        const net = Number(partialPaidAmount || 0);
+                        return formatCurrency(net.toFixed(2));
+                      })()}
+                      readOnly
+                    />
+                  </div>
                 </div>
-                {formData.paymentStatus === "Partial Paid" && (
-                  <>
-                    <div className={styles["orders-item-field"]}>
-                      <label>Paid Amount</label>
-                      <input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value={Number(partialPaidAmount || 0)}
-                        onChange={(e) => {
-                          const val = Number(e.target.value || 0);
-                          const total = calculateItemsTotal(orderItems);
-                          const clamped = Math.max(0, Math.min(val, total));
-                          setPartialPaidAmount(clamped);
-                        }}
-                      />
-                    </div>
-
-                    <div className={styles["orders-item-field"]}>
-                      <label>Unpaid Amount</label>
-                      <input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value={(() => {
-                          const total = calculateItemsTotal(orderItems);
-                          const remaining = Math.max(0, total - Number(partialPaidAmount || 0));
-                          return Number(remaining.toFixed(2));
-                        })()}
-                        onChange={(e) => {
-                          const newRemaining = Number(e.target.value || 0);
-                          const total = calculateItemsTotal(orderItems);
-                          const clampedRemaining = Math.max(0, Math.min(newRemaining, total));
-                          const newPaid = Math.max(0, total - clampedRemaining);
-                          setPartialPaidAmount(newPaid);
-                        }}
-                      />
-                    </div>
-
-                    <div className={styles["orders-item-field"]}>
-                      <label>Remaining</label>
-                      <input
-                        value={(() => {
-                          const total = calculateItemsTotal(orderItems);
-                          const remaining = Math.max(0, total - Number(partialPaidAmount || 0));
-                          return formatCurrency(remaining.toFixed(2));
-                        })()}
-                        readOnly
-                      />
-                    </div>
-
-                    <div className={styles["orders-item-field"]}>
-                      <label>Net Sales</label>
-                      <input
-                        value={(() => {
-                          const total = calculateItemsTotal(orderItems);
-                          const net = formData.paymentStatus === "Paid" ? total
-                            : formData.paymentStatus === "Partial Paid" ? Number(partialPaidAmount || 0)
-                            : 0;
-                          return formatCurrency(net.toFixed(2));
-                        })()}
-                        readOnly
-                      />
-                    </div>
-                  </>
-                )}
               </div>
             </div>
           </div>
-        </div>
+        )}
 
         <div className={styles["orders-form-actions"]}>
           <button type="submit" className={`${styles.ordersBtn} ${styles["ordersBtn-primary"]}`}>
