@@ -1,5 +1,5 @@
 // pages/Orders.jsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 import OrderService from "../services/orderService";
 import ProductService from "../services/productService";
@@ -35,6 +35,8 @@ function Orders() {
   const [productsSnapshot, setProductsSnapshot] = useState(null);
   const [orderItems, setOrderItems] = useState([{ productId: "", quantity: 1, price: 0 }]);
   const [didRestoreOnEdit, setDidRestoreOnEdit] = useState(false);
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
   // Dynamic dropdown options and add-new modal state
   const ADD_NEW = "__add_new__";
@@ -212,6 +214,25 @@ function Orders() {
       setLoading(false);
     }
   };
+
+  const toDateOnly = (d) => {
+    const dt = d ? new Date(d) : null;
+    if (!dt || isNaN(dt)) return null;
+    return new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
+  };
+
+  const filteredOrdersByDate = useMemo(() => {
+    if (!startDate && !endDate) return orders;
+    const s = startDate ? toDateOnly(startDate) : null;
+    const e = endDate ? toDateOnly(endDate) : null;
+    return (orders || []).filter((o) => {
+      const d = toDateOnly(o.date || o.created_at);
+      if (!d) return false;
+      const afterStart = s ? d >= s : true;
+      const beforeEnd = e ? d <= e : true;
+      return afterStart && beforeEnd;
+    });
+  }, [orders, startDate, endDate]);
 
   const fetchAvailableProducts = async () => {
     try {
@@ -1128,6 +1149,23 @@ function Orders() {
           <h3>Orders List</h3>
           <div className={styles["orders-header-right"]}>
             <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className={styles.ordersSearchInput}
+            />
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className={styles.ordersSearchInput}
+            />
+            {(startDate || endDate) && (
+              <button className={`${styles.ordersBtn} ${styles["ordersBtn-outline"]}`} onClick={() => { setStartDate(""); setEndDate(""); }}>
+                Clear
+              </button>
+            )}
+            <input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
@@ -1166,8 +1204,8 @@ function Orders() {
                 </tr>
               </thead>
               <tbody>
-                {orders && orders.length > 0 ? (
-                  (orders || []).filter(o => String(o.customer_name || '').toLowerCase().includes(query.trim().toLowerCase())).map((order) => (
+                {filteredOrdersByDate && filteredOrdersByDate.length > 0 ? (
+                  (filteredOrdersByDate || []).filter(o => String(o.customer_name || '').toLowerCase().includes(query.trim().toLowerCase())).map((order) => (
                     <tr key={order.id}>
                       <td>{order.id}</td>
                       <td>{order.order_id || '-'}</td>
