@@ -33,7 +33,7 @@ function Orders() {
   const [success, setSuccess] = useState("");
   const [products, setProducts] = useState([]);
   const [productsSnapshot, setProductsSnapshot] = useState(null);
-  const [orderItems, setOrderItems] = useState([{ productId: "", quantity: 1 }]);
+  const [orderItems, setOrderItems] = useState([{ productId: "", quantity: 1, price: 0 }]);
   const [didRestoreOnEdit, setDidRestoreOnEdit] = useState(false);
 
   // Dynamic dropdown options and add-new modal state
@@ -380,7 +380,7 @@ function Orders() {
   const addItemRow = () => {
     setOrderItems((prev) => [
       ...prev,
-      { productId: "", quantity: editingId ? 0 : 1, prevQuantity: 0 }
+      { productId: "", quantity: editingId ? 0 : 1, prevQuantity: 0, price: 0 }
     ]);
   };
 
@@ -424,10 +424,11 @@ function Orders() {
           ? (Number.isFinite(freeStock) ? (didRestoreOnEdit ? freeStock : prevQty + freeStock) : Infinity)
           : freeStock;
         const clamped = Number.isFinite(maxQty) ? Math.min(baseQty, maxQty) : baseQty;
-        next[index] = { ...current, productId: Number(value), quantity: clamped, prevQuantity: prevQty };
-      } else if (field === "customPrice") {
-        // (customPrice removed) ignore
-        return prev;
+        const defaultPrice = Number(p?.price ?? 0);
+        next[index] = { ...current, productId: Number(value), quantity: clamped, prevQuantity: prevQty, price: defaultPrice };
+      } else if (field === "price") {
+        const n = Math.max(0, Number(value));
+        next[index] = { ...current, price: n };
       } else {
         next[index] = { ...current, [field]: Number(value) };
       }
@@ -451,7 +452,8 @@ function Orders() {
   // Get the effective price for an item (custom price if set, otherwise product price)
   const getItemPrice = (item) => {
     const product = getProductById(item.productId);
-    return Number(product?.price ?? 0);
+    const custom = item && item.price != null ? Number(item.price) : null;
+    return custom != null && !Number.isNaN(custom) ? custom : Number(product?.price ?? 0);
   };
 
   // Calculate total for items (using custom prices if set)
@@ -544,9 +546,7 @@ function Orders() {
 
         const itemsForBackend = selectedItems.map((it) => {
           const p = getProductById(it.productId);
-          // Use product's base price (customPrice removed)
-          const rawPrice = Number(p?.price ?? 0);
-          // Round to 2 decimal places to avoid floating point drift when saving
+          const rawPrice = getItemPrice(it);
           const effectivePrice = Number(Number(rawPrice || 0).toFixed(2));
           return {
             name: p?.name || `#${it.productId}`,
@@ -637,17 +637,17 @@ function Orders() {
           );
           if (match) pid = Number(match.id);
         }
-        // Map to local item shape (no customPrice)
+        const p = sourceProducts.find(sp => Number(sp.id) === Number(pid));
         return {
           productId: pid || "",
-          // prefill quantity with existing order quantity so updates include current items
           quantity: Number(it.quantity || 0),
-          prevQuantity: Number(it.quantity || 0)
+          prevQuantity: Number(it.quantity || 0),
+          price: Number(it.price != null ? it.price : (p?.price ?? 0))
         };
       });
-      setOrderItems(items.length ? items : [{ productId: "", quantity: 0, prevQuantity: 0, customPrice: null }]);
+      setOrderItems(items.length ? items : [{ productId: "", quantity: 0, prevQuantity: 0, price: 0 }]);
     } catch (e) {
-      setOrderItems([{ productId: "", quantity: 0, prevQuantity: 0, customPrice: null }]);
+      setOrderItems([{ productId: "", quantity: 0, prevQuantity: 0, price: 0 }]);
     }
 
     setError("");
@@ -949,8 +949,11 @@ function Orders() {
                     <div className={styles["orders-item-field"]}>
                       <label>Price</label>
                       <input
-                        value={product ? formatCurrency(Number(product.price).toFixed(2)) : ""}
-                        readOnly
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={Number(item.price ?? 0)}
+                        onChange={(e) => handleItemChange(idx, "price", e.target.value)}
                       />
                     </div>
                     <div className={styles["orders-item-field"]}>
