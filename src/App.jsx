@@ -6,6 +6,7 @@ import Products from "./pages/Products";
 import Orders from "./pages/Orders";
 import Reports from "./pages/Reports";
 import Alerts from "./pages/Alerts";
+import ProductHistory from "./pages/ProductHistory";
 import ShowAllProducts from "./components/ShowAllProducts";
 import ShowAllOrders from "./components/ShowAllOrders";
 import TaxDiscountSettings from "./pages/TaxDiscountSettings";
@@ -48,6 +49,14 @@ function AppContent() {
             element={
               <ProtectedRoute featureRequired="products">
                 <Products />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/products/history"
+            element={
+              <ProtectedRoute featureRequired="products">
+                <ProductHistory />
               </ProtectedRoute>
             }
           />

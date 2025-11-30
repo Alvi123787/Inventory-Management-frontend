@@ -160,6 +160,9 @@ export default function Products() {
       <div className="inventory-products__header">
         <h2 className="inventory-products__title">Product Management</h2>
         <p className="inventory-products__subtitle">Manage your product inventory and pricing</p>
+        <div style={{ marginTop: '8px' }}>
+          <button type="button" className="inventory-products-btn" onClick={() => navigate('/products/history')}>View Product History</button>
+        </div>
       </div>
 
       {error && (
@@ -308,6 +311,9 @@ export default function Products() {
           <div className="inventory-products-table-header__left">
             <h3 className="inventory-products-table-header__title">Product List</h3>
             <span className="inventory-products-table-header__count">{filteredProductsByDate.length} products</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <button type="button" className="inventory-products-btn" onClick={() => navigate('/products/history')}>Audit Log</button>
           </div>
           <div className="inventory-products-table-header__center" style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
             <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
