@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useCallback } from "react";
 import ProductHistoryService from "../services/productHistoryService";
 
 export default function ProductHistory() {
@@ -12,7 +12,7 @@ export default function ProductHistory() {
   const [error, setError] = useState("");
   const [total, setTotal] = useState(0);
 
-  const fetchHistory = async () => {
+  const fetchHistory = useCallback(async () => {
     try {
       setLoading(true);
       setError("");
@@ -22,13 +22,19 @@ export default function ProductHistory() {
       setTotal(Number(resp?.data?.total || list.length));
     } catch (e) {
       console.error(e);
-      setError("Failed to load product history");
+      if (e?.response?.status === 404) {
+        setRecords([]);
+        setTotal(0);
+        setError("");
+      } else {
+        setError("Failed to load product history");
+      }
     } finally {
       setLoading(false);
     }
-  };
+  }, [query, sortBy, sortOrder, page, limit]);
 
-  useEffect(() => { fetchHistory(); }, [sortBy, sortOrder, page, limit]);
+  useEffect(() => { fetchHistory(); }, [fetchHistory]);
 
   const exportCSV = async () => {
     try {
@@ -150,4 +156,3 @@ export default function ProductHistory() {
     </div>
   );
 }
-
