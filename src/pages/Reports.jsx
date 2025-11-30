@@ -188,6 +188,12 @@ function Reports() {
     setFilteredOrders(filtered);
   };
 
+  // Auto-apply filter when dates or orders change
+  useEffect(() => {
+    applyFilter();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [startDate, endDate, orders]);
+
   // Derived data
   const costMap = useMemo(() => buildCostMap(products), [products]);
 
