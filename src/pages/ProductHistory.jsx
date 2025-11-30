@@ -13,6 +13,29 @@ export default function ProductHistory() {
   const [error, setError] = useState("");
   const [total, setTotal] = useState(0);
 
+  const onDeleteOne = async (id) => {
+    try {
+      if (!window.confirm('Delete this history record?')) return;
+      await ProductHistoryService.deleteOne(id);
+      await fetchHistory();
+    } catch (e) {
+      console.error(e);
+      setError('Failed to delete history record');
+    }
+  };
+
+  const onClearAll = async () => {
+    try {
+      if (!window.confirm('Delete all product history?')) return;
+      await ProductHistoryService.clearAll();
+      setPage(1);
+      await fetchHistory();
+    } catch (e) {
+      console.error(e);
+      setError('Failed to clear history');
+    }
+  };
+
   const fetchHistory = useCallback(async () => {
     try {
       setLoading(true);
@@ -65,6 +88,7 @@ export default function ProductHistory() {
     { key: 'change_summary', label: 'Change Details' },
     { key: 'timestamp', label: 'Timestamp' },
     { key: 'user_name', label: 'User' },
+    { key: 'actions', label: 'Actions' },
   ];
 
   const summarizeChange = (rec) => {
@@ -164,6 +188,7 @@ export default function ProductHistory() {
             <input type="text" value={query} onChange={(e)=>setQuery(e.target.value)} placeholder="Search by product, user, field" />
             <button type="button" className="inventory-products-btn" onClick={fetchHistory}>Search</button>
             <button type="button" className="inventory-products-btn" onClick={exportCSV}>Export CSV</button>
+            <button type="button" className="inventory-products-btn" onClick={onClearAll}>Delete All</button>
           </div>
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
             <label>Rows</label>
@@ -205,6 +230,9 @@ export default function ProductHistory() {
                     <td className="inventory-products-table__cell">{summarizeChange(rec)}</td>
                     <td className="inventory-products-table__cell">{rec.timestamp ? new Date(rec.timestamp).toLocaleString() : '-'}</td>
                     <td className="inventory-products-table__cell">{rec.user_name || '-'}</td>
+                    <td className="inventory-products-table__cell">
+                      <button type="button" className="inventory-products-btn" onClick={() => onDeleteOne(rec.history_id)}>Delete</button>
+                    </td>
                   </tr>
                 )) : (
                   <tr>
