@@ -396,25 +396,34 @@ function Orders() {
       if (field === "quantity") {
         const currentProductId = current.productId;
         const p = getProductById(currentProductId);
-        const stock = Number(p?.stock ?? Infinity);
+        const baseStock = Number(p?.stock ?? Infinity);
         const minQty = editingId ? 0 : 1;
         const n = Math.max(minQty, Number(value));
         const prevQty = editingId ? Number(current.prevQuantity || 0) : 0;
+        const othersAllocated = orderItems.reduce((sum, it, idx) => {
+          if (idx === index) return sum;
+          return Number(it.productId) === Number(currentProductId) ? sum + Number(it.quantity || 0) : sum;
+        }, 0);
+        const freeStock = Number.isFinite(baseStock) ? Math.max(0, baseStock - othersAllocated) : Infinity;
         const maxQty = editingId
-          ? (Number.isFinite(stock) ? (didRestoreOnEdit ? stock : prevQty + stock) : Infinity)
-          : stock;
+          ? (Number.isFinite(freeStock) ? (didRestoreOnEdit ? freeStock : prevQty + freeStock) : Infinity)
+          : freeStock;
         const clamped = Number.isFinite(maxQty) ? Math.min(n, maxQty) : n;
         next[index] = { ...current, quantity: clamped };
       } else if (field === "productId") {
         const p = getProductById(value);
         const baseQty = Number(current.quantity ?? (editingId ? 0 : 1));
-        const stock = Number(p?.stock ?? Infinity);
-        const prevQty = editingId ? 0 : 0; // selecting product resets prevQuantity for this row
+        const baseStock = Number(p?.stock ?? Infinity);
+        const prevQty = editingId ? 0 : 0;
+        const othersAllocated = orderItems.reduce((sum, it, idx) => {
+          if (idx === index) return sum;
+          return Number(it.productId) === Number(value) ? sum + Number(it.quantity || 0) : sum;
+        }, 0);
+        const freeStock = Number.isFinite(baseStock) ? Math.max(0, baseStock - othersAllocated) : Infinity;
         const maxQty = editingId
-          ? (Number.isFinite(stock) ? (didRestoreOnEdit ? stock : prevQty + stock) : Infinity)
-          : stock;
+          ? (Number.isFinite(freeStock) ? (didRestoreOnEdit ? freeStock : prevQty + freeStock) : Infinity)
+          : freeStock;
         const clamped = Number.isFinite(maxQty) ? Math.min(baseQty, maxQty) : baseQty;
-        // When selecting a product, use the product's default price (no per-order custom price)
         next[index] = { ...current, productId: Number(value), quantity: clamped, prevQuantity: prevQty };
       } else if (field === "customPrice") {
         // (customPrice removed) ignore
@@ -429,6 +438,14 @@ function Orders() {
   const getProductById = (id) => {
     const source = Array.isArray(productsSnapshot) ? productsSnapshot : products;
     return source.find((p) => Number(p.id) === Number(id));
+  };
+
+  const getAllocatedForProduct = (productId) => {
+    const pid = Number(productId);
+    if (!pid) return 0;
+    return orderItems.reduce((sum, it) => {
+      return Number(it.productId) === pid ? sum + Number(it.quantity || 0) : sum;
+    }, 0);
   };
 
   // Get the effective price for an item (custom price if set, otherwise product price)
@@ -489,19 +506,27 @@ function Orders() {
         return;
       }
 
-      // Validate stock availability using delta when editing
-      for (const it of selectedItems) {
+      const aggregate = new Map();
+      for (let i = 0; i < orderItems.length; i++) {
+        const it = orderItems[i];
+        if (!it.productId) continue;
         const p = getProductById(it.productId);
-        const stock = Number(p?.stock ?? 0);
+        const baseStock = Number(p?.stock ?? 0);
         const newQty = Number(it.quantity || 0);
         const prevQty = editingId ? Number(it.prevQuantity || 0) : 0;
         const delta = editingId ? (didRestoreOnEdit ? newQty : newQty - prevQty) : newQty;
-        if (!editingId && stock <= 0) {
+        const curr = aggregate.get(it.productId) || 0;
+        aggregate.set(it.productId, curr + Math.max(0, delta));
+        if (!editingId && baseStock <= 0) {
           setError(`${p?.name || "Selected product"} is out of stock`);
           return;
         }
-        if (delta > stock) {
-          setError(`Quantity for ${p?.name || "product"} exceeds available stock (${stock} available)`);
+      }
+      for (const [pid, sumDelta] of aggregate.entries()) {
+        const p = getProductById(pid);
+        const baseStock = Number(p?.stock ?? 0);
+        if (sumDelta > baseStock) {
+          setError(`Total quantity for ${p?.name || "product"} exceeds available stock (${baseStock} available)`);
           return;
         }
       }
@@ -930,7 +955,7 @@ function Orders() {
                     </div>
                     <div className={styles["orders-item-field"]}>
                       <label>Stock</label>
-                      <input value={product ? product.stock : ""} placeholder="-" readOnly />
+                      <input value={product ? Math.max(0, Number(product.stock || 0) - getAllocatedForProduct(item.productId)) : ""} placeholder="-" readOnly />
                     </div>
 
                     <div className={styles["orders-item-actions"]}>
