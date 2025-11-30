@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import api from "../api/api";
 import "./ShowAllProducts.css"; // external scoped CSS
 import { formatCurrency, getCurrencyCode } from "../utils/currency";
@@ -7,6 +7,8 @@ function ShowAllProducts() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
 
   const getAuthHeaders = () => {
@@ -53,6 +55,25 @@ function ShowAllProducts() {
     return () => es.close();
   }, []);
 
+  const toDateOnly = (d) => {
+    const dt = d ? new Date(d) : null;
+    if (!dt || isNaN(dt)) return null;
+    return new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
+  };
+
+  const filteredProducts = useMemo(() => {
+    if (!startDate && !endDate) return products;
+    const s = startDate ? toDateOnly(startDate) : null;
+    const e = endDate ? toDateOnly(endDate) : null;
+    return (products || []).filter((p) => {
+      const d = toDateOnly(p.product_date || p.created_at);
+      if (!d) return false;
+      const afterStart = s ? d >= s : true;
+      const beforeEnd = e ? d <= e : true;
+      return afterStart && beforeEnd;
+    });
+  }, [products, startDate, endDate]);
+
   return (
     <div className="products-container">
       <h3 className="products-title">All Products</h3>
@@ -70,13 +91,23 @@ function ShowAllProducts() {
         </div>
       )}
 
+      <div className="products-filters" style={{ display: "flex", gap: "0.5rem", marginBottom: "0.75rem" }}>
+        <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+        <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+        {(startDate || endDate) && (
+          <button type="button" className="products-btn-clear" onClick={() => { setStartDate(""); setEndDate(""); }}>
+            Clear
+          </button>
+        )}
+      </div>
+
       {loading ? (
         <div className="products-loading">
           <div className="spinner-border text-primary" role="status">
             <span className="visually-hidden">Loading...</span>
           </div>
         </div>
-      ) : products.length === 0 ? (
+      ) : filteredProducts.length === 0 ? (
         <p className="products-empty">No products found.</p>
       ) : (
         <div className="products-table-wrapper">
@@ -89,10 +120,11 @@ function ShowAllProducts() {
                 <th>{`Cost (${getCurrencyCode()})`}</th>
                 <th>{`Price (${getCurrencyCode()})`}</th>
                 <th>Stock</th>
+                <th>Date</th>
               </tr>
             </thead>
             <tbody>
-              {products.map((p, index) => (
+              {filteredProducts.map((p, index) => (
                 <tr key={p.id}>
                   <td>{index + 1}</td>
                   <td className="product-image-cell">
@@ -110,6 +142,7 @@ function ShowAllProducts() {
                   <td>{formatCurrency(parseFloat(p.cost))}</td>
                   <td>{formatCurrency(parseFloat(p.price))}</td>
                   <td>{p.stock}</td>
+                  <td>{(() => { const d = p.product_date || p.created_at; return d ? new Date(d).toLocaleDateString() : "-"; })()}</td>
                 </tr>
               ))}
             </tbody>
