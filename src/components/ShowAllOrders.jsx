@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import OrderService from "../services/orderService";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -10,6 +10,8 @@ function ShowAllOrders() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -30,6 +32,25 @@ function ShowAllOrders() {
     }
   };
 
+  const toDateOnly = (d) => {
+    const dt = d ? new Date(d) : null;
+    if (!dt || isNaN(dt)) return null;
+    return new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
+  };
+
+  const filteredOrders = useMemo(() => {
+    if (!startDate && !endDate) return orders;
+    const s = startDate ? toDateOnly(startDate) : null;
+    const e = endDate ? toDateOnly(endDate) : null;
+    return (orders || []).filter((o) => {
+      const d = toDateOnly(o.date || o.created_at);
+      if (!d) return false;
+      const afterStart = s ? d >= s : true;
+      const beforeEnd = e ? d <= e : true;
+      return afterStart && beforeEnd;
+    });
+  }, [orders, startDate, endDate]);
+
   return (
     <div className="all-orders-container container my-4">
       <h2 className="all-orders-title mb-4 text-center">All Orders</h2>
@@ -49,9 +70,19 @@ function ShowAllOrders() {
           <p className="mt-3 text-muted">Loading orders...</p>
         </div>
       ) : (
-        <div className="all-orders-grid row g-4">
-          {orders.length > 0 ? (
-            orders.map((order) => (
+        <>
+          <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", marginBottom: "0.75rem" }}>
+            <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+            <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+            {(startDate || endDate) && (
+              <button type="button" className="btn btn-sm btn-outline-secondary" onClick={() => { setStartDate(""); setEndDate(""); }}>
+                Clear
+              </button>
+            )}
+          </div>
+          <div className="all-orders-grid row g-4">
+          {filteredOrders.length > 0 ? (
+            filteredOrders.map((order) => (
               <div className="col-md-4 col-lg-3" key={order.id}>
                 <div className="all-orders-card card shadow-sm border-0 h-100">
                   <div className="card-body">
@@ -126,6 +157,7 @@ function ShowAllOrders() {
             </div>
           )}
         </div>
+        </>
       )}
 
       {/* Modal */}
