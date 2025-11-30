@@ -1199,6 +1199,7 @@ function Orders() {
                   <th>Status</th>
                   <th>Payment</th>
                   <th>Payment Method</th>
+                  <th>Tracking ID</th>
                   <th>Date</th>
                   <th>Actions</th>
                 </tr>
@@ -1262,6 +1263,7 @@ function Orders() {
                         )}
                       </td>
                       <td>{order.payment_method || '-'}</td>
+                      <td>{order.tracking_id || '-'}</td>
                       <td>{order.date ? new Date(order.date).toLocaleDateString() : "-"}</td>
                       <td>
                         <div className={styles["orders-action-buttons"]}>
@@ -1283,7 +1285,7 @@ function Orders() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="13" className={styles["orders-empty-row"]}>
+                    <td colSpan="14" className={styles["orders-empty-row"]}>
                       No orders found
                     </td>
                   </tr>
