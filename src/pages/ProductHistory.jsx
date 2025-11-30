@@ -20,22 +20,29 @@ export default function ProductHistory() {
     try {
       setLoading(true);
       setError("");
-      const response = await api.get("api/product-history", {
-        params: {
-          page,
-          limit,
-          search: search || undefined
-        }
-      });
+      const params = {
+        page,
+        limit
+      };
+      
+      if (search && search.trim()) {
+        params.search = search.trim();
+      }
+
+      const response = await api.get("api/product-history", { params });
 
       if (response.data.success) {
-        setHistory(response.data.data);
-        setCurrentPage(response.data.pagination.page);
-        setTotalPages(response.data.pagination.totalPages);
-        setTotal(response.data.pagination.total);
+        setHistory(response.data.data || []);
+        if (response.data.pagination) {
+          setCurrentPage(response.data.pagination.page);
+          setTotalPages(response.data.pagination.totalPages);
+          setTotal(response.data.pagination.total);
+        }
+      } else {
+        setError(response.data.message || "Failed to fetch product history");
       }
     } catch (err) {
-      setError("Failed to fetch product history");
+      setError(err.response?.data?.message || "Failed to fetch product history");
       console.error("Error fetching history:", err);
     } finally {
       setLoading(false);
