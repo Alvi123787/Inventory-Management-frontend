@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "r
 import Navbar from "./components/Navbar";
 import Dashboard from "./pages/Dashboard";
 import Products from "./pages/Products";
+import ProductHistory from "./pages/ProductHistory";
 import Orders from "./pages/Orders";
 import Reports from "./pages/Reports";
 import Alerts from "./pages/Alerts";
@@ -48,6 +49,14 @@ function AppContent() {
             element={
               <ProtectedRoute featureRequired="products">
                 <Products />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/products/history"
+            element={
+              <ProtectedRoute featureRequired="products">
+                <ProductHistory />
               </ProtectedRoute>
             }
           />

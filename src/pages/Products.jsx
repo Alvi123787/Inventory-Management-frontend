@@ -3,8 +3,10 @@ import React, { useEffect, useState } from "react";
 import api from "../api/api";
 import "./Products.css";
 import { formatCurrency } from "../utils/currency";
+import { useNavigate } from "react-router-dom";
 
 export default function Products() {
+  const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [query, setQuery] = useState("");
   const [formData, setFormData] = useState({
@@ -285,6 +287,15 @@ export default function Products() {
           <div className="inventory-products-table-header__left">
             <h3 className="inventory-products-table-header__title">Product List</h3>
             <span className="inventory-products-table-header__count">{products.length} products</span>
+          </div>
+          <div className="inventory-products-table-header__center">
+            <button
+              className="inventory-products-btn inventory-products-btn--audit"
+              onClick={() => navigate("/products/history")}
+              title="View complete audit log of all product changes"
+            >
+              📋 View Product History
+            </button>
           </div>
           <div className="inventory-products-search">
             <input
