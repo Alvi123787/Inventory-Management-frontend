@@ -1,5 +1,5 @@
 // Products.jsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import api from "../api/api";
 import "./Products.css";
 import { formatCurrency } from "../utils/currency";
@@ -21,6 +21,8 @@ export default function Products() {
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
 
   useEffect(() => {
@@ -133,6 +135,25 @@ export default function Products() {
     setEditingId(null);
     setFormData({ name: "", cost: "", price: "", discount_rate: "", stock: "", image_url: "", product_date: "" });
   };
+
+  const toDateOnly = (d) => {
+    const dt = d ? new Date(d) : null;
+    if (!dt || isNaN(dt)) return null;
+    return new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
+  };
+
+  const filteredProductsByDate = useMemo(() => {
+    if (!startDate && !endDate) return products;
+    const s = startDate ? toDateOnly(startDate) : null;
+    const e = endDate ? toDateOnly(endDate) : null;
+    return (products || []).filter((p) => {
+      const d = toDateOnly(p.product_date || p.created_at);
+      if (!d) return false;
+      const afterStart = s ? d >= s : true;
+      const beforeEnd = e ? d <= e : true;
+      return afterStart && beforeEnd;
+    });
+  }, [products, startDate, endDate]);
 
   return (
     <div className="inventory-products">
@@ -286,9 +307,17 @@ export default function Products() {
         <div className="inventory-products-table-header">
           <div className="inventory-products-table-header__left">
             <h3 className="inventory-products-table-header__title">Product List</h3>
-            <span className="inventory-products-table-header__count">{products.length} products</span>
+            <span className="inventory-products-table-header__count">{filteredProductsByDate.length} products</span>
           </div>
-          <div className="inventory-products-table-header__center"></div>
+          <div className="inventory-products-table-header__center" style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+            <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+            <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+            {(startDate || endDate) && (
+              <button type="button" className="inventory-products-btn" onClick={() => { setStartDate(""); setEndDate(""); }}>
+                Clear
+              </button>
+            )}
+          </div>
           <div className="inventory-products-search">
             <input
               type="text"
@@ -305,7 +334,7 @@ export default function Products() {
             <div className="inventory-products-spinner"></div>
             <p>Loading products...</p>
           </div>
-        ) : products.length === 0 ? (
+        ) : filteredProductsByDate.length === 0 ? (
           <div className="inventory-products-empty">
             <p className="inventory-products-empty__message">No products available</p>
             <p className="inventory-products-empty__subtitle">Add your first product to get started</p>
@@ -326,7 +355,7 @@ export default function Products() {
                 </tr>
               </thead>
               <tbody>
-                {(products || []).filter(p => String(p.name || '').toLowerCase().includes(query.trim().toLowerCase())).map((product) => (
+                {(filteredProductsByDate || []).filter(p => String(p.name || '').toLowerCase().includes(query.trim().toLowerCase())).map((product) => (
                   <tr key={product.id} className="inventory-products-table__row">
                     <td className="inventory-products-table__cell inventory-products-table__image">
                       {product.image_url ? (
