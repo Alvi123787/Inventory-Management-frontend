@@ -10,6 +10,7 @@ function ShowAllOrders() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [query, setQuery] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const navigate = useNavigate();
@@ -39,17 +40,19 @@ function ShowAllOrders() {
   };
 
   const filteredOrders = useMemo(() => {
-    if (!startDate && !endDate) return orders;
     const s = startDate ? toDateOnly(startDate) : null;
     const e = endDate ? toDateOnly(endDate) : null;
+    const term = query.trim().toLowerCase();
     return (orders || []).filter((o) => {
       const d = toDateOnly(o.date || o.created_at);
-      if (!d) return false;
-      const afterStart = s ? d >= s : true;
-      const beforeEnd = e ? d <= e : true;
-      return afterStart && beforeEnd;
+      if (s && (!d || d < s)) return false;
+      if (e && (!d || d > e)) return false;
+      if (!term) return true;
+      const byCustomer = String(o.customer_name || "").toLowerCase().includes(term);
+      const byTracking = String(o.tracking_id || "").toLowerCase().includes(term);
+      return byCustomer || byTracking;
     });
-  }, [orders, startDate, endDate]);
+  }, [orders, startDate, endDate, query]);
 
   return (
     <div className="all-orders-container container my-4">
@@ -74,6 +77,7 @@ function ShowAllOrders() {
           <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", marginBottom: "0.75rem" }}>
             <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
             <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+            <input type="text" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search by customer or tracking ID" />
             {(startDate || endDate) && (
               <button type="button" className="btn btn-sm btn-outline-secondary" onClick={() => { setStartDate(""); setEndDate(""); }}>
                 Clear
