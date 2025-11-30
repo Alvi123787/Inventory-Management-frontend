@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import ProductHistoryService from "../services/productHistoryService";
+import { formatCurrency } from "../utils/currency";
 
 export default function ProductHistory() {
   const [records, setRecords] = useState([]);
@@ -53,15 +54,72 @@ export default function ProductHistory() {
   };
 
   const columns = [
-    { key: 'timestamp', label: 'When' },
-    { key: 'product_name', label: 'Product' },
-    { key: 'action_type', label: 'Action' },
-    { key: 'field_changed', label: 'Field' },
-    { key: 'old_value', label: 'Old Value' },
-    { key: 'new_value', label: 'New Value' },
+    { key: 'image_url', label: 'Image' },
+    { key: 'product_name', label: 'Name' },
+    { key: 'cost', label: 'Cost Price' },
+    { key: 'price', label: 'Sale Price' },
+    { key: 'discount_rate', label: 'Discount (%)' },
+    { key: 'stock', label: 'Stock' },
+    { key: 'product_date', label: 'Product Date' },
+    { key: 'action_type', label: 'Action Type' },
+    { key: 'change_summary', label: 'Change Details' },
+    { key: 'timestamp', label: 'Timestamp' },
     { key: 'user_name', label: 'User' },
-    { key: 'user_email', label: 'Email' },
   ];
+
+  const summarizeChange = (rec) => {
+    const f = String(rec.field_changed || '').trim();
+    const oldVal = rec.old_value;
+    const newVal = rec.new_value;
+    const action = String(rec.action_type || '').toUpperCase();
+    const labelMap = {
+      name: 'Name',
+      price: 'Sale Price',
+      discount_rate: 'Discount (%)',
+      cost: 'Cost Price',
+      stock: 'Stock',
+      product_date: 'Product Date',
+      image_url: 'Image',
+      product: 'Product'
+    };
+    const label = labelMap[f] || (f ? f : '');
+    const toCurrency = (v) => formatCurrency(v);
+    const toPercent = (v) => `${Number(v || 0)}%`;
+    const fmt = (field, v) => {
+      if (field === 'price' || field === 'cost') return toCurrency(v);
+      if (field === 'discount_rate') return toPercent(v);
+      if (field === 'name') return `'${String(v || '')}'`;
+      if (field === 'product_date') return String(v || '-');
+      return String(v ?? '-');
+    };
+    if (action === 'DELETE') {
+      try {
+        const parsed = JSON.parse(String(oldVal || '{}'));
+        const nm = parsed?.name ? `'${parsed.name}'` : `#${rec.product_id}`;
+        return `Product deleted (${nm})`;
+      } catch {
+        return 'Product deleted';
+      }
+    }
+    if (action === 'CREATE') {
+      if (!f) return 'Product created';
+      return `${label} set to ${fmt(f, newVal)}`;
+    }
+    if (action === 'STOCK_ADJUSTMENT') {
+      const o = Number(oldVal);
+      const n = Number(newVal);
+      if (!Number.isNaN(o) && !Number.isNaN(n)) {
+        if (n < o) return `Stock reduced from ${o} to ${n}`;
+        if (n > o) return `Stock increased from ${o} to ${n}`;
+        return `Stock unchanged at ${n}`;
+      }
+      return `Stock changed from ${String(oldVal ?? '-') } to ${String(newVal ?? '-')}`;
+    }
+    if (action === 'UPDATE') {
+      return `${label} changed from ${fmt(f, oldVal)} to ${fmt(f, newVal)}`;
+    }
+    return `${label || 'Change'}: ${String(newVal ?? '-')}`;
+  };
 
   const onSort = (key) => {
     if (sortBy === key) setSortOrder(sortOrder === 'ASC' ? 'DESC' : 'ASC');
@@ -134,14 +192,19 @@ export default function ProductHistory() {
               <tbody>
                 {filtered.length ? filtered.map(rec => (
                   <tr key={rec.history_id} className="inventory-products-table__row">
-                    <td className="inventory-products-table__cell">{rec.timestamp ? new Date(rec.timestamp).toLocaleString() : '-'}</td>
+                    <td className="inventory-products-table__cell" style={{ width: 56 }}>
+                      {rec.image_url ? <img src={rec.image_url} alt={rec.product_name || ''} style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: 4 }} /> : '-'}
+                    </td>
                     <td className="inventory-products-table__cell">{rec.product_name || `#${rec.product_id}`}</td>
+                    <td className="inventory-products-table__cell">{formatCurrency(rec.cost)}</td>
+                    <td className="inventory-products-table__cell">{formatCurrency(rec.price)}</td>
+                    <td className="inventory-products-table__cell">{`${Number(rec.discount_rate || 0)}%`}</td>
+                    <td className="inventory-products-table__cell">{rec.stock ?? '-'}</td>
+                    <td className="inventory-products-table__cell">{rec.product_date ? new Date(rec.product_date).toLocaleDateString() : '-'}</td>
                     <td className="inventory-products-table__cell">{rec.action_type}</td>
-                    <td className="inventory-products-table__cell">{rec.field_changed || '-'}</td>
-                    <td className="inventory-products-table__cell">{rec.old_value ?? '-'}</td>
-                    <td className="inventory-products-table__cell">{rec.new_value ?? '-'}</td>
+                    <td className="inventory-products-table__cell">{summarizeChange(rec)}</td>
+                    <td className="inventory-products-table__cell">{rec.timestamp ? new Date(rec.timestamp).toLocaleString() : '-'}</td>
                     <td className="inventory-products-table__cell">{rec.user_name || '-'}</td>
-                    <td className="inventory-products-table__cell">{rec.user_email || '-'}</td>
                   </tr>
                 )) : (
                   <tr>
