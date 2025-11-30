@@ -288,15 +288,7 @@ export default function Products() {
             <h3 className="inventory-products-table-header__title">Product List</h3>
             <span className="inventory-products-table-header__count">{products.length} products</span>
           </div>
-          <div className="inventory-products-table-header__center">
-            <button
-              className="inventory-products-btn inventory-products-btn--audit"
-              onClick={() => navigate("/products/history")}
-              title="View complete audit log of all product changes"
-            >
-              📋 View Product History
-            </button>
-          </div>
+          <div className="inventory-products-table-header__center"></div>
           <div className="inventory-products-search">
             <input
               type="text"
