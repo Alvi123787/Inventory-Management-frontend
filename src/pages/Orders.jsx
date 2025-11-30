@@ -1169,7 +1169,7 @@ function Orders() {
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search by customer"
+              placeholder="Search by customer or tracking ID"
               className={styles.ordersSearchInput}
             />
             <button className={`${styles.ordersBtn} ${styles["ordersBtn-outline"]}`} onClick={fetchOrders}>
@@ -1205,7 +1205,15 @@ function Orders() {
               </thead>
               <tbody>
                 {filteredOrdersByDate && filteredOrdersByDate.length > 0 ? (
-                  (filteredOrdersByDate || []).filter(o => String(o.customer_name || '').toLowerCase().includes(query.trim().toLowerCase())).map((order) => (
+                  (filteredOrdersByDate || [])
+                    .filter(o => {
+                      const term = query.trim().toLowerCase();
+                      if (!term) return true;
+                      const byCustomer = String(o.customer_name || '').toLowerCase().includes(term);
+                      const byTracking = String(o.tracking_id || '').toLowerCase().includes(term);
+                      return byCustomer || byTracking;
+                    })
+                    .map((order) => (
                     <tr key={order.id}>
                       <td>{order.id}</td>
                       <td>{order.order_id || '-'}</td>
