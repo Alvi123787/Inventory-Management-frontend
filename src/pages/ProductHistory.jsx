@@ -1,130 +1,124 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import api from "../api/api";
 import { formatCurrency } from "../utils/currency";
 import "./ProductHistory.css"
 
 export default function ProductHistory() {
-  // Static demo data - no API calls
-  const demoRecords = [
-    {
-      history_id: 1,
-      product_id: 101,
-      product_name: "Premium Laptop",
-      image_url: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=100&h=100&fit=crop",
-      cost: 850.00,
-      price: 1299.99,
-      discount_rate: 15,
-      stock: 45,
-      product_date: "2024-01-15",
-      action_type: "CREATE",
-      field_changed: "name",
-      old_value: null,
-      new_value: "Premium Laptop",
-      timestamp: "2024-01-15T10:30:00Z",
-      user_name: "Alex Johnson",
-      user_email: "alex@example.com"
-    },
-    {
-      history_id: 2,
-      product_id: 102,
-      product_name: "Wireless Headphones",
-      image_url: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=100&h=100&fit=crop",
-      cost: 75.00,
-      price: 149.99,
-      discount_rate: 10,
-      stock: 120,
-      product_date: "2024-01-14",
-      action_type: "UPDATE",
-      field_changed: "price",
-      old_value: "159.99",
-      new_value: "149.99",
-      timestamp: "2024-01-16T14:45:00Z",
-      user_name: "Maria Garcia",
-      user_email: "maria@example.com"
-    },
-    {
-      history_id: 3,
-      product_id: 103,
-      product_name: "Smart Watch",
-      image_url: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=100&h=100&fit=crop",
-      cost: 120.00,
-      price: 249.99,
-      discount_rate: 20,
-      stock: 78,
-      product_date: "2024-01-10",
-      action_type: "STOCK_ADJUSTMENT",
-      field_changed: "stock",
-      old_value: "65",
-      new_value: "78",
-      timestamp: "2024-01-17T09:15:00Z",
-      user_name: "David Chen",
-      user_email: "david@example.com"
-    },
-    {
-      history_id: 4,
-      product_id: 104,
-      product_name: "Gaming Mouse",
-      image_url: "https://images.unsplash.com/photo-1527814050087-3793815479db?w=100&h=100&fit=crop",
-      cost: 25.00,
-      price: 59.99,
-      discount_rate: 0,
-      stock: 200,
-      product_date: "2024-01-05",
-      action_type: "DELETE",
-      field_changed: "product",
-      old_value: '{"name":"Gaming Mouse","id":104}',
-      new_value: null,
-      timestamp: "2024-01-18T16:20:00Z",
-      user_name: "Sarah Williams",
-      user_email: "sarah@example.com"
-    },
-    {
-      history_id: 5,
-      product_id: 105,
-      product_name: "Bluetooth Speaker",
-      image_url: "https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=100&h=100&fit=crop",
-      cost: 45.00,
-      price: 89.99,
-      discount_rate: 25,
-      stock: 90,
-      product_date: "2024-01-12",
-      action_type: "UPDATE",
-      field_changed: "discount_rate",
-      old_value: "15",
-      new_value: "25",
-      timestamp: "2024-01-19T11:10:00Z",
-      user_name: "Michael Brown",
-      user_email: "michael@example.com"
-    }
-  ];
-
-  const [records] = useState(demoRecords);
+  const [records, setRecords] = useState([]);
   const [query, setQuery] = useState("");
-  const [sortBy, setSortBy] = useState("timestamp");
+  const [sortBy, setSortBy] = useState("change_date");
   const [sortOrder, setSortOrder] = useState("DESC");
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(5);
-  const [loading] = useState(false); // Static, so always false
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const total = demoRecords.length;
 
-  // Static demo functions - no API calls
-  const onDeleteOne = (id) => {
-    if (window.confirm('This is a demo. In a real app, this would delete the record.')) {
-      setError(`Demo: Record #${id} would be deleted in a real application.`);
-      setTimeout(() => setError(""), 3000);
+  const fetchHistory = async () => {
+    try {
+      setLoading(true);
+      setError("");
+      const [histRes, prodRes] = await Promise.all([
+        api.get("api/product-history"),
+        api.get("api/products"),
+      ]);
+
+      const historyRows = Array.isArray(histRes?.data?.data) ? histRes.data.data : [];
+      const products = Array.isArray(prodRes?.data?.data) ? prodRes.data.data : [];
+      const byId = new Map(products.map(p => [Number(p.id), p]));
+
+      const normalized = historyRows.map(r => {
+        const p = r.product_id != null ? byId.get(Number(r.product_id)) : null;
+        return {
+          ...r,
+          image_url: p?.image_url || null,
+          cost: p?.cost != null ? Number(p.cost) : null,
+          price: p?.price != null ? Number(p.price) : null,
+          discount_rate: p?.discount_rate != null ? Number(p.discount_rate) : 0,
+          stock: p?.stock != null ? Number(p.stock) : null,
+          product_date: p?.product_date || null,
+          user_email: "",
+        };
+      });
+
+      setRecords(normalized);
+    } catch (err) {
+      console.error("Failed to fetch product history:", err);
+      setError(err?.response?.data?.message || "Failed to load product history");
+      setRecords([]);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const onClearAll = () => {
-    if (window.confirm('This is a demo. In a real app, this would delete all history.')) {
-      setError("Demo: All history would be cleared in a real application.");
-      setTimeout(() => setError(""), 3000);
+  useEffect(() => {
+    fetchHistory();
+  }, []);
+
+  const onDeleteOne = async (id) => {
+    if (!id) return;
+    if (!window.confirm("Are you sure you want to delete this history record?")) return;
+    try {
+      setLoading(true);
+      await api.delete(`api/product-history/${id}`);
+      await fetchHistory();
+    } catch (err) {
+      console.error("Failed to delete history record:", err);
+      setError(err?.response?.data?.message || "Failed to delete history record");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onClearAll = async () => {
+    if (!window.confirm("Are you sure you want to clear all filtered history records?")) return;
+    try {
+      setLoading(true);
+      const ids = filtered.map(r => r.id).filter(Boolean);
+      await Promise.all(ids.map(id => api.delete(`api/product-history/${id}`)));
+      await fetchHistory();
+    } catch (err) {
+      console.error("Failed to clear history:", err);
+      setError(err?.response?.data?.message || "Failed to clear history");
+    } finally {
+      setLoading(false);
     }
   };
 
   const exportCSV = () => {
-    setError("Demo: CSV export would download in a real application.");
-    setTimeout(() => setError(""), 3000);
+    try {
+      const headers = [
+        "id","product_id","product_name","action_type","field_changed","old_value","new_value","quantity","change_date","user_name","notes","price","cost","discount_rate","stock","product_date"
+      ];
+      const rows = filtered.map(r => [
+        r.id,
+        r.product_id,
+        r.product_name,
+        r.action_type,
+        r.field_changed,
+        r.old_value,
+        r.new_value,
+        r.quantity,
+        r.change_date,
+        r.user_name,
+        r.notes,
+        r.price,
+        r.cost,
+        r.discount_rate,
+        r.stock,
+        r.product_date,
+      ]);
+      const csv = [headers.join(","), ...rows.map(r => r.map(v => v == null ? "" : String(v).includes(",") ? `"${String(v).replace(/"/g, '""')}"` : String(v)).join(","))].join("\n");
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `product_history_${Date.now()}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      setError("Failed to export CSV");
+      setTimeout(() => setError(""), 3000);
+    }
   };
 
   const columns = [
@@ -137,7 +131,7 @@ export default function ProductHistory() {
     { key: 'product_date', label: 'Added', sortable: true },
     { key: 'action_type', label: 'Action', sortable: true },
     { key: 'change_summary', label: 'Change Details', sortable: false },
-    { key: 'timestamp', label: 'Timestamp', sortable: true },
+    { key: 'change_date', label: 'Timestamp', sortable: true },
     { key: 'user_name', label: 'User', sortable: true },
     { key: 'actions', label: '', sortable: false },
   ];
@@ -228,7 +222,6 @@ export default function ProductHistory() {
     );
   }, [records, query]);
 
-  // Sort records
   const sortedAndFiltered = useMemo(() => {
     const filteredRecords = [...filtered];
     
@@ -238,7 +231,7 @@ export default function ProductHistory() {
         let bVal = b[sortBy];
         
         // Handle special cases
-        if (sortBy === 'timestamp' || sortBy === 'product_date') {
+        if (sortBy === 'change_date' || sortBy === 'product_date') {
           aVal = new Date(aVal).getTime();
           bVal = new Date(bVal).getTime();
         }
@@ -381,7 +374,7 @@ export default function ProductHistory() {
                   </thead>
                   <tbody className="prod-history__tbody">
                     {sortedAndFiltered.map(rec => (
-                      <tr key={rec.history_id} className="prod-history__tr">
+                      <tr key={rec.id} className="prod-history__tr">
                         <td className="prod-history__td prod-history__td--image">
                           {rec.image_url ? (
                             <img 
@@ -429,7 +422,7 @@ export default function ProductHistory() {
                           {summarizeChange(rec)}
                         </td>
                         <td className="prod-history__td">
-                          {new Date(rec.timestamp).toLocaleString()}
+                          {rec.change_date ? new Date(rec.change_date).toLocaleString() : ""}
                         </td>
                         <td className="prod-history__td">
                           <div className="prod-history__user">
@@ -441,7 +434,7 @@ export default function ProductHistory() {
                           <button 
                             type="button" 
                             className="prod-history__action-btn"
-                            onClick={() => onDeleteOne(rec.history_id)}
+                            onClick={() => onDeleteOne(rec.id)}
                             title="Delete record"
                           >
                             <svg className="prod-history__action-icon" viewBox="0 0 24 24" width="16" height="16">
