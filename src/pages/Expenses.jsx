@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../api/api";
 import "./Expenses.css";
 import { formatCurrency } from "../utils/currency";
 
@@ -18,7 +18,7 @@ const ExpensesPage = () => {
   const [success, setSuccess] = useState("");
   const [filterCategory, setFilterCategory] = useState("All");
 
-  const API = "https://inventory-backend-black.vercel.app/";
+  const API = null;
 
   // Build dynamic category list from existing expenses for filtering
   const uniqueCategories = Array.from(new Set(expenses.map((exp) => exp.category)));
@@ -35,10 +35,7 @@ const ExpensesPage = () => {
     setLoading(true);
     setError("");
     try {
-      const token = localStorage.getItem("token");
-      const { data } = await axios.get(`${API}/api/expenses`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const { data } = await api.get("api/expenses");
       setExpenses(data);
     } catch (err) {
       setError("Failed to fetch expenses. Please try again.");
@@ -60,16 +57,11 @@ const ExpensesPage = () => {
 
     setLoading(true);
     try {
-      const token = localStorage.getItem("token");
       if (editingId) {
-        await axios.put(`${API}/api/expenses/${editingId}`, form, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        await api.put(`api/expenses/${editingId}`, form);
         setSuccess("Expense updated successfully!");
       } else {
-        await axios.post(`${API}/api/expenses`, form, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        await api.post("api/expenses", form);
         setSuccess("Expense added successfully!");
       }
       setForm({ title: "", category: "", amount: "", notes: "" });
@@ -93,10 +85,7 @@ const ExpensesPage = () => {
 
     setError("");
     try {
-      const token = localStorage.getItem("token");
-      await axios.delete(`${API}/api/expenses/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await api.delete(`api/expenses/${id}`);
       setSuccess("Expense deleted successfully!");
       fetchExpenses();
       
