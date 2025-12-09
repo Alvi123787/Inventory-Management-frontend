@@ -18,7 +18,7 @@ const ExpensesPage = () => {
   const [success, setSuccess] = useState("");
   const [filterCategory, setFilterCategory] = useState("All");
 
-  const API = "https://inventory-backend-mu-olive.vercel.app";
+  const API = "https://inventory-backend-black.vercel.app/";
 
   // Build dynamic category list from existing expenses for filtering
   const uniqueCategories = Array.from(new Set(expenses.map((exp) => exp.category)));

@@ -132,7 +132,7 @@ function Reports() {
 
   // Subscribe to SSE for real-time refresh
   useEffect(() => {
-    const es = new EventSource(`https://inventory-backend-mu-olive.vercel.app/events`);
+    const es = new EventSource(`https://inventory-backend-black.vercel.app/events`);
     es.onmessage = async (e) => {
       try {
         const msg = JSON.parse(e.data);
