@@ -30,6 +30,7 @@ export default function ProductHistory() {
         const p = r.product_id != null ? byId.get(Number(r.product_id)) : null;
         return {
           ...r,
+          id: r.id ?? r.history_id,
           image_url: p?.image_url || null,
           cost: p?.cost != null ? Number(p.cost) : null,
           price: p?.price != null ? Number(p.price) : null,
