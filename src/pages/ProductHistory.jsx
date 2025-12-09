@@ -392,7 +392,6 @@ export default function ProductHistory() {
                         </td>
                         <td className="prod-history__td prod-history__td--product">
                           <div className="prod-history__product-name">{rec.product_name}</div>
-                          <div className="prod-history__product-id">ID: {rec.product_id}</div>
                         </td>
                         <td className="prod-history__td prod-history__td--numeric">
                           {formatCurrency(rec.cost)}
