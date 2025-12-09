@@ -3,7 +3,7 @@ import axios from "axios";
 import { getToken, logout } from "../utils/auth";
 
 const api = axios.create({
-  baseURL: "https://inventory-management-backend-flame.vercel.app",
+  baseURL: "https://inventory-backend-mu-olive.vercel.app/",
   headers: { "Content-Type": "application/json" },
 });
 

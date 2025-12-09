@@ -31,7 +31,7 @@ export default function Products() {
 
   // Subscribe to SSE for real-time refresh
   useEffect(() => {
-    const es = new EventSource(`https://inventory-management-backend-flame.vercel.app/events`);
+    const es = new EventSource(`https://inventory-backend-mu-olive.vercel.app/events`);
     es.onmessage = (e) => {
       try {
         const msg = JSON.parse(e.data);
