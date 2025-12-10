@@ -175,6 +175,8 @@ const UserManagement = () => {
   const [message, setMessage] = useState("");
   const [showRoleModal, setShowRoleModal] = useState(false);
   const [tempFeatureRoles, setTempFeatureRoles] = useState([]);
+  const [assignUserId, setAssignUserId] = useState(null);
+  const [assignMode, setAssignMode] = useState(false);
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -228,12 +230,18 @@ const UserManagement = () => {
     e.preventDefault();
     if (role === 'sub_admin') {
       setShowRoleModal(true);
+      setAssignMode(false);
       return;
     }
     const token = localStorage.getItem("token");
     try {
       setLoading(true);
-      await register(token, { name: form.name, email: form.email, password: form.password, role: form.role });
+      const data = await register(token, { name: form.name, email: form.email, password: form.password, role: form.role });
+      if (data && data.showPageAssignModal && data.userId && (data.created_role === 'user')) {
+        setAssignUserId(data.userId);
+        setAssignMode(true);
+        setShowRoleModal(true);
+      }
       setForm({ name: "", email: "", password: "", role: "user", feature_roles: [] });
       setShowAddForm(false);
       setMessage("User added successfully");
@@ -290,6 +298,28 @@ const UserManagement = () => {
       fetchUsers();
     } catch (err) {
       setMessage("Failed to add user: " + (err.response?.data?.message || err.message));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const confirmAssignRolesForAdmin = async () => {
+    if (tempFeatureRoles.length < 1 || tempFeatureRoles.length > 2) {
+      setMessage("Select 1 or 2 roles");
+      return;
+    }
+    if (!assignUserId) return;
+    try {
+      setLoading(true);
+      await api.post(`api/auth/users/${assignUserId}/roles`, { feature_roles: tempFeatureRoles });
+      setTempFeatureRoles([]);
+      setAssignUserId(null);
+      setAssignMode(false);
+      setShowRoleModal(false);
+      setMessage("Access roles assigned successfully");
+      fetchUsers();
+    } catch (err) {
+      setMessage("Failed to assign roles: " + (err.response?.data?.message || err.message));
     } finally {
       setLoading(false);
     }
@@ -382,8 +412,8 @@ const UserManagement = () => {
               </div>
             </div>
             <div style={{ padding: '0.75rem 1.25rem', borderTop: '1px solid #e0e0e0', display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
-              <button type="button" style={{ ...userManagementStyles.button, ...userManagementStyles.buttonDanger }} onClick={() => { setShowRoleModal(false); setTempFeatureRoles([]); }}>Cancel</button>
-              <button type="button" style={{ ...userManagementStyles.button, ...userManagementStyles.buttonSuccess }} onClick={confirmCreateWithRoles}>Assign & Create</button>
+              <button type="button" style={{ ...userManagementStyles.button, ...userManagementStyles.buttonDanger }} onClick={() => { setShowRoleModal(false); setTempFeatureRoles([]); setAssignMode(false); setAssignUserId(null); }}>Cancel</button>
+              <button type="button" style={{ ...userManagementStyles.button, ...userManagementStyles.buttonSuccess }} onClick={assignMode ? confirmAssignRolesForAdmin : confirmCreateWithRoles}>{assignMode ? 'Assign & Save' : 'Assign & Create'}</button>
             </div>
           </div>
         </div>

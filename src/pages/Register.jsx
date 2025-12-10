@@ -1,10 +1,9 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { register } from "../services/authService";
+import api from "../api/api";
 import "./Register.css"; // Scoped stylesheet
 
 const Register = () => {
-  const navigate = useNavigate();
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -16,6 +15,9 @@ const Register = () => {
 
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showRoleModal, setShowRoleModal] = useState(false);
+  const [tempFeatureRoles, setTempFeatureRoles] = useState([]);
+  const [createdUserId, setCreatedUserId] = useState(null);
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -53,6 +55,10 @@ const Register = () => {
     try {
       const data = await register(token, form);
       setMessage(data.message || "User registered successfully.");
+      if (data && data.showPageAssignModal && data.userId && (data.created_role === 'user')) {
+        setCreatedUserId(data.userId);
+        setShowRoleModal(true);
+      }
       // Integrations setup removed
       setForm({
         name: "",
@@ -63,6 +69,37 @@ const Register = () => {
       });
     } catch (err) {
       setMessage(err.response?.data?.message || "Registration failed.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const toggleTempRole = (v) => {
+    let next = Array.isArray(tempFeatureRoles) ? [...tempFeatureRoles] : [];
+    if (next.includes(v)) {
+      next = next.filter((r) => r !== v);
+    } else {
+      if (next.length >= 2) return;
+      next.push(v);
+    }
+    setTempFeatureRoles(next);
+  };
+
+  const confirmAssignRoles = async () => {
+    if (!createdUserId) return;
+    if (!Array.isArray(tempFeatureRoles) || tempFeatureRoles.length < 1 || tempFeatureRoles.length > 2) {
+      setMessage("Select 1 or 2 roles");
+      return;
+    }
+    try {
+      setIsLoading(true);
+      const payload = { feature_roles: tempFeatureRoles };
+      await api.post(`api/auth/users/${createdUserId}/roles`, payload);
+      setTempFeatureRoles([]);
+      setShowRoleModal(false);
+      setMessage("Access roles assigned successfully");
+    } catch (err) {
+      setMessage(err.response?.data?.message || "Failed to assign roles");
     } finally {
       setIsLoading(false);
     }
@@ -157,6 +194,34 @@ const Register = () => {
           </form>
         </div>
       </div>
+      {showRoleModal && (
+        <div className="modal-overlay">
+          <div className="modal-card">
+            <div className="modal-header">
+              <h5>Assign Page Access</h5>
+            </div>
+            <div className="modal-body">
+              <p>Select up to 2 pages the new user can access:</p>
+              <div className="feature-grid">
+                {['products','orders','reports','dashboard','expenses','settings'].map((f) => (
+                  <button
+                    key={f}
+                    type="button"
+                    className={`feature-pill ${tempFeatureRoles.includes(f) ? 'selected' : ''}`}
+                    onClick={() => toggleTempRole(f)}
+                  >
+                    {f}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button type="button" className="btn-secondary" onClick={() => { setShowRoleModal(false); setTempFeatureRoles([]); }}>Cancel</button>
+              <button type="button" className="btn-primary" onClick={confirmAssignRoles}>Assign & Save</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
