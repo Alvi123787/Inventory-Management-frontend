@@ -263,7 +263,6 @@ const UserManagement = () => {
       } else {
         next = next.filter((r) => r !== v);
       }
-      if (next.length > 2) return; // enforce max 2 selections
       setForm({ ...form, feature_roles: next });
     } else {
       setForm({ ...form, [name]: value });
@@ -275,15 +274,14 @@ const UserManagement = () => {
     if (next.includes(v)) {
       next = next.filter((r) => r !== v);
     } else {
-      if (next.length >= 2) return;
       next.push(v);
     }
     setTempFeatureRoles(next);
   };
 
   const confirmCreateWithRoles = async () => {
-    if (tempFeatureRoles.length < 1 || tempFeatureRoles.length > 2) {
-      setMessage("Select 1 or 2 roles");
+    if (tempFeatureRoles.length < 1) {
+      setMessage("Select at least 1 page");
       return;
     }
     try {
@@ -304,8 +302,8 @@ const UserManagement = () => {
   };
 
   const confirmAssignRolesForAdmin = async () => {
-    if (tempFeatureRoles.length < 1 || tempFeatureRoles.length > 2) {
-      setMessage("Select 1 or 2 roles");
+    if (tempFeatureRoles.length < 1) {
+      setMessage("Select at least 1 page");
       return;
     }
     if (!assignUserId) return;
@@ -399,7 +397,7 @@ const UserManagement = () => {
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
           <div style={{ background: '#fff', borderRadius: '8px', width: '420px', maxWidth: '90%', boxShadow: '0 10px 25px rgba(0,0,0,0.2)' }}>
             <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid #e0e0e0' }}>
-              <h4 style={{ margin: 0 }}>Select Roles (min 1, max 2)</h4>
+              <h4 style={{ margin: 0 }}>Assign Page Access (min 1)</h4>
             </div>
             <div style={{ padding: '1.25rem' }}>
               <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>

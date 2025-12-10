@@ -79,7 +79,6 @@ const Register = () => {
     if (next.includes(v)) {
       next = next.filter((r) => r !== v);
     } else {
-      if (next.length >= 2) return;
       next.push(v);
     }
     setTempFeatureRoles(next);
@@ -87,8 +86,8 @@ const Register = () => {
 
   const confirmAssignRoles = async () => {
     if (!createdUserId) return;
-    if (!Array.isArray(tempFeatureRoles) || tempFeatureRoles.length < 1 || tempFeatureRoles.length > 2) {
-      setMessage("Select 1 or 2 roles");
+    if (!Array.isArray(tempFeatureRoles) || tempFeatureRoles.length < 1) {
+      setMessage("Select at least 1 page");
       return;
     }
     try {
@@ -201,7 +200,7 @@ const Register = () => {
               <h5>Assign Page Access</h5>
             </div>
             <div className="modal-body">
-              <p>Select up to 2 pages the new user can access:</p>
+              <p>Select at least 1 page the new user can access:</p>
               <div className="feature-grid">
                 {['products','orders','reports','dashboard','expenses','settings'].map((f) => (
                   <button
